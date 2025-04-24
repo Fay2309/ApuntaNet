@@ -1,0 +1,59 @@
+<h1>Registro</h1>
+
+<form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+  <div class="form-row">
+    <label>
+      *Nombre de Usuario:
+      <input type="text" formControlName="usuario">
+    </label>
+    <small *ngIf="registroForm.get('usuario')?.invalid && registroForm.get('usuario')?.touched" style="color: red;">
+      El nombre de usuario es obligatorio.
+    </small>
+
+    <label>
+      *Correo electrónico:
+      <input type="email" formControlName="correo">
+    </label>
+    <small *ngIf="registroForm.get('correo')?.errors?.['required'] && registroForm.get('correo')?.touched" style="color: red;">
+      El correo es obligatorio.
+    </small>
+    <small *ngIf="registroForm.get('correo')?.errors?.['email'] && registroForm.get('correo')?.touched" style="color: red;">
+      El correo no es válido.
+    </small>
+  </div>
+
+  <div class="form-row">
+    <label>
+      *Contraseña:
+      <input type="password" formControlName="contrasena">
+    </label>
+    <small *ngIf="registroForm.get('contrasena')?.errors?.['required'] && registroForm.get('contrasena')?.touched" style="color: red;">
+      La contraseña es obligatoria.
+    </small>
+    <small *ngIf="registroForm.get('contrasena')?.errors?.['pattern'] && registroForm.get('contrasena')?.touched" style="color: red;">
+      La contraseña debe tener al menos una letra y un número.
+    </small>
+
+    <label>
+      *Confirmar contraseña:
+      <input type="password" formControlName="confirmarContrasena">
+    </label>
+    <small *ngIf="registroForm.errors?.['mismatch'] && registroForm.get('confirmarContrasena')?.touched" style="color: red;">
+      Las contraseñas no coinciden.
+    </small>
+  </div>
+
+  <div class="form-row center">
+    <label>
+      *Número de teléfono:
+      <input type="text" formControlName="telefono">
+    </label>
+    <small *ngIf="registroForm.get('telefono')?.invalid && registroForm.get('telefono')?.touched" style="color: red;">
+      El número de telefono es obligatorio.
+    </small>
+  </div>
+
+  <button type="submit" [disabled]="registroForm.invalid">Registrarme</button>
+</form>
+
+<p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
