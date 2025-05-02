@@ -10,9 +10,9 @@
   <br><br>
   <label>
     Contraseña:
-    <input type="password" formControlName="contrasena">
+    <input type="password" formControlName="password">
   </label>
-  <small *ngIf="loginForm.get('contrasena')?.errors?.['required'] && loginForm.get('contrasena')?.touched" style="color: red;">
+  <small *ngIf="loginForm.get('password')?.errors?.['required'] && loginForm.get('password')?.touched" style="color: red;">
     La contraseña es obligatoria.
   </small>
   <br><br>

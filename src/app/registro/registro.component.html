@@ -25,20 +25,20 @@
   <div class="form-row">
     <label>
       *Contraseña:
-      <input type="password" formControlName="contrasena">
+      <input type="password" formControlName="password">
     </label>
-    <small *ngIf="registroForm.get('contrasena')?.errors?.['required'] && registroForm.get('contrasena')?.touched" style="color: red;">
+    <small *ngIf="registroForm.get('password')?.errors?.['required'] && registroForm.get('password')?.touched" style="color: red;">
       La contraseña es obligatoria.
     </small>
-    <small *ngIf="registroForm.get('contrasena')?.errors?.['pattern'] && registroForm.get('contrasena')?.touched" style="color: red;">
+    <small *ngIf="registroForm.get('password')?.errors?.['pattern'] && registroForm.get('password')?.touched" style="color: red;">
       La contraseña debe tener al menos una letra y un número.
     </small>
 
     <label>
       *Confirmar contraseña:
-      <input type="password" formControlName="confirmarContrasena">
+      <input type="password" formControlName="confirmarPassword">
     </label>
-    <small *ngIf="registroForm.errors?.['mismatch'] && registroForm.get('confirmarContrasena')?.touched" style="color: red;">
+    <small *ngIf="registroForm.errors?.['mismatch'] && registroForm.get('confirmarPassword')?.touched" style="color: red;">
       Las contraseñas no coinciden.
     </small>
   </div>

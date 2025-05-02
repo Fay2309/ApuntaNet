@@ -17,19 +17,19 @@ export class RegistroComponent {
     this.registroForm = this.fb.group({
       usuario: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
-      contrasena: ['', [
+      password: ['', [
         Validators.required,
         Validators.minLength(5),
         Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{5,}$/)
       ]],
-      confirmarContrasena: ['', Validators.required],
+      confirmarPassword: ['', Validators.required],
       telefono: ['', Validators.required]
     }, { validators: this.matchPasswords });
   }
 
   matchPasswords(group: FormGroup) {
-    const pass = group.get('contrasena')?.value;
-    const confirm = group.get('confirmarContrasena')?.value;
+    const pass = group.get('password')?.value;
+    const confirm = group.get('confirmarPassword')?.value;
     return pass === confirm ? null : { mismatch: true };
   }
 

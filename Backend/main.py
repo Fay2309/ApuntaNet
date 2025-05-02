@@ -1,23 +1,29 @@
 from flask import Flask,jsonify,request
 import mysql.connector
+from flask_cors import CORS
 
 #Se genera la Api
 Api = Flask(__name__)
+CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}}, 
+     supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='201614',
+                                   password='hola12',
                                    host='localhost',
                                    database='apuntanet_db')
 
 
-@Api.route("/login", methods=['GET'])
+@Api.route("/login", methods=['POST'])
 def login():
-    usuario = request.args.get('usuario')
-    password = request.args.get('password')
+    data = request.get_json()
+    usuario = data.get('usuario')
+    password = data.get('password')
+    
     cursor = conexion.cursor()
-    cursor.execute("SELECT usuario, contraseña FROM apuntanet_db.usuarios WHERE usuario = %s AND contraseña = %s", (usuario, password))
+    cursor.execute("SELECT usuario, password FROM apuntanet_db.usuarios WHERE usuario = %s AND password = %s", (usuario, password))
     resultado = cursor.fetchone()
     conexion.close()
+
     if resultado:
         return jsonify({"status": "success", "message": "Inicio completado"}), 200
     else:
