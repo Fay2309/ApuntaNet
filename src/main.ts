@@ -8,6 +8,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { LoginComponent } from './app/login/login.component';
 import { RegistroComponent } from './app/registro/registro.component';
 import { BienvenidaComponent } from '@app/bienvenida/bienvenida.component';
+import { PruebaComponent } from '@app/prueba/prueba.component';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -17,7 +18,8 @@ bootstrapApplication(AppComponent, {
       { path: '', redirectTo: 'login', pathMatch: 'full' },
       { path: 'login', component: LoginComponent },
       { path: 'registro', component: RegistroComponent },
-      { path: 'bienvenida', component: BienvenidaComponent }
+      { path: 'bienvenida', component: BienvenidaComponent },
+      { path: 'prueba', component: PruebaComponent }
     ])
   ]
 }).catch(err => console.error(err));

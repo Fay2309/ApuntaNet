@@ -209,7 +209,7 @@ DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `Id` int NOT NULL,
   `usuario` varchar(45) NOT NULL,
-  `contraseña` varchar(45) NOT NULL,
+  `password` varchar(45) NOT NULL,
   `correo` varchar(45) NOT NULL,
   `telefono` varchar(45) NOT NULL,
   PRIMARY KEY (`Id`)
