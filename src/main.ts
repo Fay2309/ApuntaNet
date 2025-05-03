@@ -8,7 +8,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { LoginComponent } from './app/login/login.component';
 import { RegistroComponent } from './app/registro/registro.component';
 import { BienvenidaComponent } from '@app/bienvenida/bienvenida.component';
-
+import { LandingpageComponent } from '@app/landingpage/landingpage.component';
 bootstrapApplication(AppComponent, {
   providers: [
     importProvidersFrom(ReactiveFormsModule),
@@ -18,6 +18,7 @@ bootstrapApplication(AppComponent, {
       { path: 'login', component: LoginComponent },
       { path: 'registro', component: RegistroComponent },
       { path: 'bienvenida', component: BienvenidaComponent },
+      { path: 'landingpage', component: LandingpageComponent }
     ])
   ]
 }).catch(err => console.error(err));
