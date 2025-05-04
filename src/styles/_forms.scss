@@ -1,52 +1,21 @@
 // src/styles/_forms.scss
 
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    background-color: $light-gray;
-    padding: 2rem;
-    border-radius: $border-radius;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+input, select, textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
   
-    label {
-      display: flex;
-      flex-direction: column;
-      color: $dark-gray;
-      font-weight: bold;
-    }
-  
-    input {
-      padding: $input-padding;
-      border: 1px solid #ccc;
-      border-radius: $border-radius;
-      font-size: 1rem;
-    }
-  
-    button {
-      background-color: $primary-color;
-      color: white;
-      padding: 0.8rem;
-      border: none;
-      border-radius: $border-radius;
-      cursor: pointer;
-  
-      &:hover {
-        background-color: darken($primary-color, 10%);
-      }
-    }
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
   }
   
-  .form-row {
-    display: flex;
-    gap: 20px;
-    justify-content: space-between;
-  
-    label {
-      flex: 1;
-    }
-  
-    &.center {
-      justify-content: center;
-    }
+  &.is-invalid {
+    border-color: $error-color;
   }
+}

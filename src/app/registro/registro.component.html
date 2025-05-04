@@ -1,59 +1,59 @@
-<h1>Registro</h1>
+<div class="page-container registro-page">
+  <div class="card registro-container fade-in">
+    <div class="registro-header text-center">
+      <h2>Registro</h2>
+      <p>Crea tu cuenta</p>
+    </div>
 
-<form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
-  <div class="form-row">
-    <label>
-      *Nombre de Usuario:
-      <input type="text" formControlName="usuario">
-    </label>
-    <small *ngIf="registroForm.get('usuario')?.invalid && registroForm.get('usuario')?.touched" style="color: red;">
-      El nombre de usuario es obligatorio.
-    </small>
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="registro-form">
+      <div class="form-group">
+        <label>Nombre de Usuario</label>
+        <input type="text" formControlName="usuario" placeholder="Usuario">
+        <small *ngIf="registroForm.get('usuario')?.invalid && registroForm.get('usuario')?.touched" class="text-error">
+          El nombre de usuario es obligatorio.
+        </small>
+      </div>
 
-    <label>
-      *Correo electrónico:
-      <input type="email" formControlName="correo">
-    </label>
-    <small *ngIf="registroForm.get('correo')?.errors?.['required'] && registroForm.get('correo')?.touched" style="color: red;">
-      El correo es obligatorio.
-    </small>
-    <small *ngIf="registroForm.get('correo')?.errors?.['email'] && registroForm.get('correo')?.touched" style="color: red;">
-      El correo no es válido.
-    </small>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" formControlName="correo" placeholder="Correo">
+        <small *ngIf="registroForm.get('correo')?.errors?.['required'] && registroForm.get('correo')?.touched" class="text-error">
+          El correo es obligatorio.
+        </small>
+        <small *ngIf="registroForm.get('correo')?.errors?.['email'] && registroForm.get('correo')?.touched" class="text-error">
+          El correo no es válido.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" formControlName="password" placeholder="Contraseña">
+        <small *ngIf="registroForm.get('password')?.errors?.['required'] && registroForm.get('password')?.touched" class="text-error">
+          La contraseña es obligatoria.
+        </small>
+        <small *ngIf="registroForm.get('password')?.errors?.['pattern'] && registroForm.get('password')?.touched" class="text-error">
+          Debe contener al menos una letra y un número.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Confirmar contraseña</label>
+        <input type="password" formControlName="confirmarPassword" placeholder="Confirmar contraseña">
+        <small *ngIf="registroForm.errors?.['mismatch'] && registroForm.get('confirmarPassword')?.touched" class="text-error">
+          Las contraseñas no coinciden.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Número de teléfono</label>
+        <input type="text" formControlName="telefono" placeholder="Teléfono">
+        <small *ngIf="registroForm.get('telefono')?.invalid && registroForm.get('telefono')?.touched" class="text-error">
+          El número de teléfono es obligatorio.
+        </small>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-3" [disabled]="registroForm.invalid">Registrarme</button>
+      <p class="text-center mt-2">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+    </form>
   </div>
-
-  <div class="form-row">
-    <label>
-      *Contraseña:
-      <input type="password" formControlName="password">
-    </label>
-    <small *ngIf="registroForm.get('password')?.errors?.['required'] && registroForm.get('password')?.touched" style="color: red;">
-      La contraseña es obligatoria.
-    </small>
-    <small *ngIf="registroForm.get('password')?.errors?.['pattern'] && registroForm.get('password')?.touched" style="color: red;">
-      La contraseña debe tener al menos una letra y un número.
-    </small>
-
-    <label>
-      *Confirmar contraseña:
-      <input type="password" formControlName="confirmarPassword">
-    </label>
-    <small *ngIf="registroForm.errors?.['mismatch'] && registroForm.get('confirmarPassword')?.touched" style="color: red;">
-      Las contraseñas no coinciden.
-    </small>
-  </div>
-
-  <div class="form-row center">
-    <label>
-      *Número de teléfono:
-      <input type="text" formControlName="telefono">
-    </label>
-    <small *ngIf="registroForm.get('telefono')?.invalid && registroForm.get('telefono')?.touched" style="color: red;">
-      El número de telefono es obligatorio.
-    </small>
-  </div>
-
-  <button type="submit" [disabled]="registroForm.invalid">Registrarme</button>
-</form>
-
-<p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+</div>
