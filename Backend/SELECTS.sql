@@ -29,4 +29,7 @@ WHERE
     monto_individual.id_usuario = 1 AND
     monto_individual.estado = "XPG" #por pagar 
 ORDER BY 
-	monto_individual.fecha_expiracion ASC;
+	monto_individual.fecha_expiracion ASC
+;
+SET FOREIGN_KEY_CHECKS = 1; #sirve para desctivar las foreing keys
+

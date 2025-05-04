@@ -22,12 +22,74 @@ def login():
     cursor = conexion.cursor()
     cursor.execute("SELECT usuario, password FROM apuntanet_db.usuarios WHERE usuario = %s AND password = %s", (usuario, password))
     resultado = cursor.fetchone()
-    conexion.close()
+    cursor.close()
 
     if resultado:
         return jsonify({"status": "success", "message": "Inicio completado"}), 200
     else:
         return jsonify({"status": "error", "message": "Credenciales incorrectas"}), 401
+    
+@Api.rout("/registro", methods=['POST'])
+def registro ():
+    data = request.get_json()
+    usuario = data.get('usuario')
+    contraseña = data.get('contraseña')
+    correo = data.get('correo')
+    telefono = data.get('telefono')
+
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            INSERT INTO usuarios (usuario, contraseña, correo, telefono)
+            VALUES (%s, %s, %s, %s)""", 
+            (usuario, contraseña, correo, telefono))
+        conexion.commit()  # Confirma los cambios en la base de datos
+        return jsonify({"status": "Correcto", "message": "Usuario registrado exitosamente"}), 201
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error al registrar usuario: {err}"}), 500
+    finally:
+        cursor.close()
+
+@Api.route("/hogar/crear", methods=['POST'])
+def crear_hogar():
+    data = request.get_json()
+    nombre_hogar = data.get('nombre_hogar')
+    usuario = data.get('usuario')
+
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            INSERT INTO hogar (nombre, descripcion, creador, fecha_creacion, codigo)
+            VALUES (%s, %s, %s, NOW(), %s)""", 
+            (nombre_hogar, None, usuario, codigo))
+        conexion.commit()  # Confirma los cambios en la base de datos
+        return jsonify({"status": "Correcto", "message": "Hogar creado exitosamente"}), 201
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error al crear hogar: {err}"}), 500
+    finally:
+        cursor.close()
+
+@Api.route("/categoria/crear", methods=['POST'])
+def crear_categoria():
+    data = request.get_json()
+    id_hogar = data.get('id_hogar')
+    nombre = data.get('nombre_categoria')
+    descripcion = data.get('descripcion_categoria')
+    grado_privilegio = data.get('grado_privilegio')
+    fecha_creacion = data.get('fecha_creacion')
+
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            INSERT INTO categoria (nombre, id_hogar, descripcion, grado_privilegio, fecha_creacion, usuario)
+            VALUES (%s, %s, %s, %s, NOW(), %s)""", 
+            (nombre, id_hogar, descripcion, grado_privilegio, fecha_creacion, usuario))
+        conexion.commit()  # Confirma los cambios en la base de datos
+        return jsonify({"status": "Correcto", "message": "Categoria creada exitosamente"}), 201
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error al crear categoria: {err}"}), 500
+    finally:
+        cursor.close()
 
 @Api.route("/Desglose", methods=['GET'])
 def desglose():
@@ -80,7 +142,7 @@ def tickets():
                         monto_individual.fecha_expiracion ASC;
 """,(usuario))
     resultado = cursor.fetchall()
-    conexion.close()
+    cursor.close()
     if resultado:
         tickets = [{"nombre": row[0], "descripcion": row[1], "monto_abonado": row[2], "monto_total": row[3], "fecha_expiracion": row[4]} for row in resultado]
         return jsonify({"status": "success", "tickets": tickets}), 200
