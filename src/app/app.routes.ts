@@ -6,7 +6,7 @@ import { BienvenidaComponent } from './bienvenida/bienvenida.component';
 import { LandingpageComponent } from './landingpage/landingpage.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'login', pathMatch: 'full' },
+    { path: '', redirectTo: 'landingpage', pathMatch: 'full' },
     { path: 'login', component: LoginComponent },
     { path: 'registro', component: RegistroComponent },
     { path: 'bienvenida', component: BienvenidaComponent },
