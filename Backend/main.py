@@ -8,7 +8,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='hola12',
+                                   password='root',
                                    host='localhost',
                                    database='apuntanet_db')
 
@@ -29,7 +29,7 @@ def login():
     else:
         return jsonify({"status": "error", "message": "Credenciales incorrectas"}), 401
     
-@Api.rout("/registro", methods=['POST'])
+@Api.route("/registro", methods=['POST'])
 def registro ():
     data = request.get_json()
     usuario = data.get('usuario')
