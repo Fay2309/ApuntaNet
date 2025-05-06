@@ -33,16 +33,16 @@ def login():
 def registro ():
     data = request.get_json()
     usuario = data.get('usuario')
-    contraseña = data.get('contraseña')
+    password = data.get('password')
     correo = data.get('correo')
     telefono = data.get('telefono')
 
     try:
         cursor = conexion.cursor()
         cursor.execute("""
-            INSERT INTO usuarios (usuario, contraseña, correo, telefono)
+            INSERT INTO usuarios (usuario, password, correo, telefono)
             VALUES (%s, %s, %s, %s)""", 
-            (usuario, contraseña, correo, telefono))
+            (usuario, password, correo, telefono))
         conexion.commit()  # Confirma los cambios en la base de datos
         return jsonify({"status": "Correcto", "message": "Usuario registrado exitosamente"}), 201
     except mysql.connector.Error as err:
