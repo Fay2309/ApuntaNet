@@ -87,6 +87,40 @@ def crear_hogar():
         cursor.close()
 
 
+#esta ruta sirve para consultar los hogares a los que pertenece el usuario
+#se le pasa el token del usuario, el cual se utiliza para obtener el id del usuario.
+@Api.route("/hogar/consultar/", methods=['POST'])
+def consultar_hogar():
+    data = request.get_json()
+    token = data.get('token').split(" ")[1]
+    decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+    id_usuario = decoded_token['id_usuario']
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT hogar.id, hogar.nombre, hogar.descripcion, hogar.codigo, hogar.fecha_creacion
+            FROM hogar
+            INNER JOIN casas_usuarios ON hogar.id = casas_usuarios.id_hogar
+            WHERE casas_usuarios.id_usuario = %s""", (id_usuario,))
+
+        resultados = cursor.fetchall()
+        hogares = []
+        for row in resultados:
+            hogares.append({
+                'id': row[0],
+                'nombre': row[1],
+                'descripcion': row[2],
+                'codigo': row[3],
+                'fecha_creacion': row[4].strftime('%Y-%m-%d %H:%M:%S')
+            })
+        
+        return jsonify({"status": "Correcto", "hogares": hogares}), 200
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error al consultar hogares: {err}"}), 500
+    finally:
+        cursor.close()
+    
+
 #sirve para unirse a un hogar existente, 
 # se le pasa el token y el codigo del hogar. la fecha de creacion se le asigna automaticamente la fecha actual
 @Api.route("/hogar/unirse", methods=['POST'])
@@ -106,7 +140,7 @@ def unirse_hogar():
             ,(id_usuario, codigo))
         
         conexion.commit()  # Confirma los cambios en la base de datos
-        return jsonify({"status": "Correcto", "message": "Hogar creado exitosamente"}), 201
+        return jsonify({"status": "Correcto", "message": "Ingreso exitoso"}), 201
     except mysql.connector.Error as err:
         return jsonify({"status": "error", "message": f"Error al crear hogar: {err}"}), 500
     finally:
@@ -135,6 +169,37 @@ def crear_categoria():
         return jsonify({"status": "error", "message": f"Error al crear categoria: {err}"}), 500
     finally:
         cursor.close()
+
+#esta ruta sirve para consultar las categorias de un hogar
+#se le pasa el id del hogar, el cual se utiliza para obtener las categorias de ese hogar
+@Api.route("/categoria/consultar", methods=['POST'])
+def consultar_categoria():
+    data = request.get_json()
+    id_hogar = data.get('id_hogar')
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT id, nombre, descripcion, grado_privilegio, fecha_creacion
+            FROM categoria
+            WHERE id_hogar = %s""", (id_hogar,))
+
+        resultados = cursor.fetchall()
+        categorias = []
+        for row in resultados:
+            categorias.append({
+                'id': row[0],
+                'nombre': row[1],
+                'descripcion': row[2],
+                'grado_privilegio': row[3],
+                'fecha_creacion': row[4].strftime('%Y-%m-%d %H:%M:%S')
+            })
+        
+        return jsonify({"status": "Correcto", "categorias": categorias}), 200
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error al consultar categorias: {err}"}), 500
+    finally:
+        cursor.close()
+
 
 #retorna el monto total y el nombre de la categoria, tomando en cuenta el mes y el año actual
 #se le pasa id del usuario y el id del hogar
