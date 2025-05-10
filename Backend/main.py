@@ -203,10 +203,12 @@ def consultar_categoria():
 
 #retorna el monto total y el nombre de la categoria, tomando en cuenta el mes y el año actual
 #se le pasa id del usuario y el id del hogar
-@Api.route("/Desglose", methods=['GET'])
+@Api.route("/DesgloseMensual", methods=['GET'])
 def desglose():
     cursor = conexion.cursor()
-    usuario = request.args.get('usuario')
+    token = request.get_json('token').split(" ")[1]
+    decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+    usuario = decoded_token['id_usuario']
     hogar_id = request.args.get('hogar_id')
     cursor.execute("""SELECT 
                         categoria.nombre AS categoria,
@@ -235,10 +237,12 @@ def desglose():
 
 #sirve para obtener los tickets de los hogares al que pertenece el usuario
 #se le pasa el id del hogar y el id del usuario
-@Api.route("/Tickets", methods=['GET'])
+@Api.route("/ticketsIndividual/consultar", methods=['GET'])
 def tickets():
     cursor = conexion.cursor()
-    usuario = request.args.get('usuario')
+    token = request.get_json('token').split(" ")[1]
+    decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+    usuario = decoded_token['id_usuario']
     hogar_id = request.args.get('hogar_id')
     cursor.execute("""SELECT 
                         ticket.nombre,
@@ -277,6 +281,7 @@ def crearcodigo():
         return crearcodigo()  # Genera un nuevo código si ya existe uno igual
     else:
         return codigo
+    
 
 
 #se ejecuta la api
