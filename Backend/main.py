@@ -3,7 +3,7 @@ import mysql.connector
 from flask_cors import CORS
 import random
 import string
-import jwt
+import jwt #<-- Instalar Pip install PyJWT
 #Se genera la Api
 SECRET_KEY = 'UnaDeCasaParaElGaelPlis'
 Api = Flask(__name__)
@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='root',
+                                   password='hola12',
                                    host='localhost',
                                    database='apuntanet_db')
 

@@ -1,4 +1,48 @@
+$primary-color: #1976d2af;
+$secondary-color: #b271ebc6;
+$terciary-color: #dd2eb1;
+
+.bienvenida-fondo {
+  padding: 2rem;
+  border-radius: 2rem;
+  margin: 2rem auto;
+  max-width: 900px; 
+  box-shadow: 0 0 20px rgb(8, 48, 121); 
+  background: rgba(255, 255, 255, 0.303);
+}
+
+// CONTENEDOR DE LOS BOTONES
+//
+.cardbienvenida {
+  background-color: #f8f8f85d;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px  rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  margin-bottom: 20px;
+  position: relative;
+  transition: all 0.3s ease;
+
+    &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(to right, #b271eb, #1976d2);
+    border-radius: 10px 10px 0 0;
+  }
+}
+
+//APARTADO DEL TITULO Y LOGO DE LA EMPRESA
+//
 .bienvenida-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 2rem;
     display: flex;
     flex-direction: column;
@@ -15,23 +59,73 @@
         gap: 0.5rem;
   
         img {
-          width: 80px;
+          width: 40px;
         }
   
         .titulo {
           font-size: 1.8rem;
           font-weight: bold;
+          color: white;
+          text-align: center;
         }
       }
   
+    //APARTADO DEL USUARIO
+    //
       .usuario {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-  
+        cursor: pointer;
+
+        .menu {
+          @extend .cardbienvenida;
+          position: absolute;
+          top: 100px;
+          right: 1;
+          background-color: #fff9f9cf;
+          padding: 10px;
+          min-width: 170px;
+          display: none;
+          z-index: 1000;
+          list-style: none;
+          overflow: hidden; 
+          border-radius: 8px;
+
+          .btnMenuUsuario {
+            width: calc(100% - 10px); 
+            margin: 5px auto; 
+            padding: 10px 15px; 
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s; 
+            border: 0 ;
+            background: #ffffff;
+            text-align: center;
+            white-space: nowrap; 
+
+            &:hover {
+              background-color: #f5f5f5; 
+              box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+            }
+            
+            &:active {
+              background-color: #e0e0e0; 
+            }
+          }
+
+          &.visible {
+            display: block;
+          }
+        }
+        
         span {
           font-size: 1rem;
           font-weight: 500;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          color: white
         }
   
         .avatar {
@@ -60,7 +154,7 @@
         flex-wrap: wrap;
   
         .accion {
-          background-color: black;
+          background: linear-gradient(to right, $secondary-color, $primary-color);
           color: white;
           border: none;
           border-radius: 2rem;
@@ -80,7 +174,7 @@
           }
   
           &:hover {
-            background-color: #333;
+            background: linear-gradient(to right, $secondary-color, $primary-color, ter);
             transform: scale(1.05);
           }
         }

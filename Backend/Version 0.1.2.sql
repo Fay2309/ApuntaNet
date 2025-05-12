@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `apuntanet_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `apuntanet_db`;
 -- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
 --
 -- Host: localhost    Database: apuntanet_db
@@ -207,13 +209,13 @@ DROP TABLE IF EXISTS `usuarios`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuarios` (
-  `Id` int NOT NULL,
+  `Id` int NOT NULL AUTO_INCREMENT,
   `usuario` varchar(45) NOT NULL,
   `password` varchar(45) NOT NULL,
   `correo` varchar(45) NOT NULL,
   `telefono` varchar(45) NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabla con informacion del usuario';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabla con informacion del usuario';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -222,13 +224,9 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'Filiberto','UnaMotomamiPlis','filiberogalvez@gmail.com','6688858358');
+INSERT INTO `usuarios` VALUES (1,'Filiberto','UnaMotomamiPlis','filiberogalvez@gmail.com','6688858358'),(2,'Gael','hola12','gaelvalenzuela2309@gmail.com','6682272112');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping events for database 'apuntanet_db'
---
 
 --
 -- Dumping routines for database 'apuntanet_db'
@@ -243,4 +241,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-30 15:51:29
+-- Dump completed on 2025-05-11 18:16:45

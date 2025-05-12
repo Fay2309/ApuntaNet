@@ -1,27 +1,37 @@
 <div class="bienvenida-container">
-    <header class="header">
-      <div class="logo">
-        <img src="/logoem.jpg" alt="Logo" />
-        <span class="titulo">ApuntaNet</span>
+  <header class="header">
+    <div class="logo">
+      <img src="/verificacion.png" alt="Logo" />
+      <span class="titulo">ApuntaNet</span>
+    </div>
+    <div class="usuario">
+      <span>Bienvenido <strong>{{ nombreUsuario }}</strong></span>
+      <img src="/usuario.png" alt="Usuario" class="avatar" (click)="toggleMenu()"/>
+
+      <div class="menu" [class.visible]="menuVisible">
+        <button class="btnMenuUsuario" (click)="logout()">Cerrar sesión</button>
       </div>
-      <div class="usuario">
-        <span>Bienvenido <strong>usuario</strong></span>
-        <img src="/usuario.png" alt="Usuario" class="avatar" />
+    </div>
+  </header>
+
+  <div class="cardbienvenida">
+    <div class="bienvenida-container">
+      
+        <main class="acciones">
+          <h2>¿Qué deseas hacer?</h2>
+          <div class="botones">
+            <button class="accion">
+              <span>Ingrese a un hogar</span>
+              <img src="/iniciar-sesion.png" alt="Ingresar" />
+            </button>
+            <button class="accion">
+              <span>Crea un hogar</span>
+              <img src="/casa.png" alt="Crear" />
+            </button>
+          </div>
+        </main>
       </div>
-    </header>
-  
-    <main class="acciones">
-      <h2>¿Qué deseas hacer?</h2>
-      <div class="botones">
-        <button class="accion">
-          <span>Ingrese a un hogar</span>
-          <img src="/ingresa.png" alt="Ingresar" />
-        </button>
-        <button class="accion">
-          <span>Crea un hogar</span>
-          <img src="/crear.png" alt="Crear" />
-        </button>
-      </div>
-    </main>
+    </div>
   </div>
+  
   

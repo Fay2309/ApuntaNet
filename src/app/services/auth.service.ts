@@ -14,10 +14,28 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(usuario: string, password: string): Observable<any> {
-    const body = { usuario, password }
-
-    return this.http.post(this.apiUrl, body);
+    const body = { usuario, password };
+  
+    return new Observable(observer => {
+      this.http.post(this.apiUrl, body).subscribe({
+        next: (response) => {
+          localStorage.setItem('usuario', usuario); 
+          observer.next(response);
+          observer.complete();
+        },
+        error: (err) => {
+          observer.error(err);
+        }
+      });
+    });
   }
+  obtenerUsuarioActual(): string | null {
+    return localStorage.getItem('usuario');
+  }
+  logout() {
+    localStorage.removeItem('usuario');
+  }
+  
 
   registro(usuario: string, password: string, correo: string, telefono: string): Observable<any> {
     const body = { usuario, password, correo, telefono }
