@@ -18,7 +18,7 @@ bootstrapApplication(AppComponent, {
       { path: 'login', component: LoginComponent },
       { path: 'registro', component: RegistroComponent },
       { path: 'bienvenida', component: BienvenidaComponent },
-      { path: 'landingpage', component: LandingpageComponent }
+      { path: 'landingpage', component: LandingpageComponent },
     ])
   ]
 }).catch(err => console.error(err));

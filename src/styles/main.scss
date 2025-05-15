@@ -28,10 +28,10 @@ body {
   overflow: hidden;
 }
 
-// Animaciones
+//Animaciones
 .waves-container {
   position: fixed;
-  top: 0;
+  top: -4px;
   left: 0;
   width: 100%;
   height: 100%;
@@ -42,7 +42,7 @@ body {
 .wave {
   position: absolute;
   width: 200%;
-  height: 200px;
+  height: 250px;
   bottom: -25px;
   left: -50%;
   border-radius: 1000px;

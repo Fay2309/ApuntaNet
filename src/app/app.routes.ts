@@ -10,7 +10,7 @@ export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'registro', component: RegistroComponent },
     { path: 'bienvenida', component: BienvenidaComponent },
-    { path: 'landingpage', component: LandingpageComponent }
+    { path: 'landingpage', component: LandingpageComponent },
 ];
 
 export const appRouter = provideRouter(routes);

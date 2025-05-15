@@ -13,28 +13,57 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(usuario: string, password: string): Observable<any> {
-    const body = { usuario, password };
-  
-    return new Observable(observer => {
-      this.http.post(this.apiUrl, body).subscribe({
-        next: (response) => {
-          localStorage.setItem('usuario', usuario); 
+login(usuario: string, password: string): Observable<any> {
+  const body = { usuario, password };
+
+  return new Observable(observer => {
+    this.http.post<any>(this.apiUrl, body).subscribe({
+      next: (response) => {
+        if (response && response.status === "Correcto") {
+          const token = response.token;
+          const tokenPayload = this.decodeToken(token);
+
+          const usuarioGuardado = {
+            id: tokenPayload?.id_usuario || 0,
+            nombre: usuario 
+          };
+
+          localStorage.setItem('token', token);
+          localStorage.setItem('usuario', JSON.stringify(usuarioGuardado));
+
+          console.log("Token guardado en localStorage:", token);
+          console.log("Usuario guardado en localStorage:", usuarioGuardado);
+          
           observer.next(response);
           observer.complete();
-        },
-        error: (err) => {
-          observer.error(err);
+        } else {
+          console.error("Respuesta de login inesperada:", response);
+          observer.error("Formato de respuesta inválido");
         }
-      });
+      },
+      error: (err) => {
+        console.error("Error en login:", err);
+        observer.error(err);
+      }
     });
+  });
+}
+
+private decodeToken(token: string): any {
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const payload = JSON.parse(atob(payloadBase64));
+    return payload;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
   }
-  obtenerUsuarioActual(): string | null {
-    return localStorage.getItem('usuario');
-  }
-  logout() {
-    localStorage.removeItem('usuario');
-  }
+}
+
+obtenerUsuarioActual(): { id: number; nombre: string } | null {
+  const usuario = localStorage.getItem('usuario');
+  return usuario ? JSON.parse(usuario) : null;
+}
   
 
   registro(usuario: string, password: string, correo: string, telefono: string): Observable<any> {

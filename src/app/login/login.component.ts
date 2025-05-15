@@ -31,7 +31,7 @@ export class LoginComponent {
       this.authService.login(usuario, password).subscribe({
         next: (respuesta) => {
           console.log('Login exitoso:', respuesta);
-          this.router.navigate(['/bienvenida']); // AQUI EL CAMBIO DE PÁGINA
+          this.router.navigate(['/bienvenida']); 
         },
         error: (err) => {
           console.error('Login fallido:', err);
