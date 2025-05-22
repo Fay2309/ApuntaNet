@@ -216,6 +216,7 @@ CREATE TABLE `usuarios` (
   `password` varchar(45) NOT NULL,
   `correo` varchar(45) NOT NULL,
   `telefono` varchar(45) NOT NULL,
+  'estado' varchar (1),
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabla con informacion del usuario';
 /*!40101 SET character_set_client = @saved_cs_client */;

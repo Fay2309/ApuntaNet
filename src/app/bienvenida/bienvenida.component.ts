@@ -97,7 +97,11 @@ crearHogar(): void {
         this.cerrarModal();
       },
       error: (error) => {
-        console.error('Error al crear hogar:', error);
+        if (error.status === 400 && error.error.message) {
+          alert(error.error.message); // Muestra el mensaje del backend
+        } else {
+          console.error('Error al crear hogar:', error);
+        }
       }
     });
   } else {
@@ -125,7 +129,11 @@ ingresarHogar(): void {
         this.cerrarModal();
       },
       error: (error) => {
-        console.error('Error al ingresar al hogar:', error);
+        if (error.status === 400 && error.error.message) {
+          alert(error.error.message); // Muestra el mensaje del backend
+        } else {
+          console.error('Error al ingresar al hogar:', error);
+        }
       }
     });
   } else {

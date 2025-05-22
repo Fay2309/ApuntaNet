@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='hola12',
+                                   password='root',
                                    host='localhost',
                                    database='apuntanet_db')
 
@@ -84,10 +84,18 @@ def crear_hogar(data):
 
     try:
         cursor = conexion.cursor()
+        # Verifica si el usuario ya pertenece a un hogar
+        cursor.execute("SELECT estado FROM usuarios WHERE Id = %s", (id_usuario,))
+        estado = cursor.fetchone()
+        if estado and estado[0] == 'A':
+            return jsonify({"status": "error", "message": "No puedes crear un hogar porque ya perteneces a uno"}), 400
+
         cursor.execute("""
             INSERT INTO hogar (nombre, descripcion, id_usuario, fecha_creacion, codigo)
             VALUES (%s, %s, %s, NOW(), %s)
         """, (nombre_hogar, descripcion, id_usuario, codigo))
+        # Cambia el estado del usuario a 'A' (activo)
+        cursor.execute("UPDATE usuarios SET estado = 'A' WHERE Id = %s", (id_usuario,))
         conexion.commit()
         return jsonify({"status": "Correcto", "message": "Hogar creado exitosamente"}), 201
     except mysql.connector.Error as err:
@@ -96,27 +104,29 @@ def crear_hogar(data):
         cursor.close()
 
 def unirse_hogar(data):
-    
     raw_token = data.get('token')
     if not raw_token or not raw_token.startswith("Bearer "):
         return jsonify({"status": "error", "message": "Token no proporcionado o malformado"}), 401
 
     token = raw_token.split(" ")[1]
-
-    print("TOKEN:", raw_token)
-    print("DATOS RECIBIDOS:", data)
-
-
     codigo = data.get('codigo')
     cursor = conexion.cursor()
     try:
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         id_usuario = decoded_token['id_usuario']
-        
+
+        # Verifica si el usuario ya pertenece a un hogar
+        cursor.execute("SELECT estado FROM usuarios WHERE Id = %s", (id_usuario,))
+        estado = cursor.fetchone()
+        if estado and estado[0] == 'A':
+            return jsonify({"status": "error", "message": "No puedes pertenecer a dos hogares al mismo tiempo"}), 400
+
         cursor.execute("""
             INSERT INTO casas_usuarios (id_usuario, id_hogar, fecha_ingreso)
             VALUES (%s, (SELECT id FROM hogar WHERE codigo = %s), NOW())
         """, (id_usuario, codigo))
+        # Cambia el estado del usuario a 'A' (activo)
+        cursor.execute("UPDATE usuarios SET estado = 'A' WHERE Id = %s", (id_usuario,))
         conexion.commit()
         return jsonify({"status": "Correcto", "message": "Ingreso exitoso"}), 201
     except mysql.connector.Error as err:
@@ -127,55 +137,6 @@ def unirse_hogar(data):
         return jsonify({"status": "error", "message": "Token inválido"}), 401
     finally:
         cursor.close()
-
-
-#esta ruta sirve para crear un hogar en la base de datos
-#se le pasa el nombre del hogar, la descripcion y el id del usuario. la fecha de creacion se le asigna automaticamente la fecha actual
-# @Api.route("/bienvenida", methods=['POST'])
-# def crear_hogar():
-#     data = request.get_json()
-#     nombre_hogar = data.get('nombre_hogar')
-#     descripcion = data.get('descripcion_hogar')
-#     codigo = crearcodigo()
-#     try:
-#         cursor = conexion.cursor()
-#         cursor.execute("""
-#             INSERT INTO hogar (nombre, descripcion, id_usuario, fecha_creacion, codigo)
-#             VALUES (%s, %s, %s, NOW(), %s)""", 
-
-#             (nombre_hogar, descripcion, data.get('id_usuario'), codigo))
-#         conexion.commit()  # Confirma los cambios en la base de datos
-#         return jsonify({"status": "Correcto", "message": "Hogar creado exitosamente"}), 201
-#     except mysql.connector.Error as err:
-#         return jsonify({"status": "error", "message": f"Error al crear hogar: {err}"}), 500
-#     finally:
-#         cursor.close()
-
-
-# #sirve para unirse a un hogar existente, 
-# # se le pasa el token y el codigo del hogar. la fecha de creacion se le asigna automaticamente la fecha actual
-# @Api.route("/bienvenida", methods=['POST'])
-# def unirse_hogar():
-#     data = request.get_json()
-#     codigo = data.get('codigo')
-#     token = request.get_json('token').split(" ")[1]
-#     decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-
-#     id_usuario = decoded_token['id_usuario']
-
-#     try:
-#         cursor = conexion.cursor()
-#         cursor.execute("""
-#             INSERT INTO casas_usuarios (id_usuario, id_hogar)
-#             VALUES (%s,(SELECT id from hogar Where codigo =%s),NOW())"""
-#             ,(id_usuario, codigo))
-        
-#         conexion.commit()  # Confirma los cambios en la base de datos
-#         return jsonify({"status": "Correcto", "message": "Ingreso exitoso"}), 201
-#     except mysql.connector.Error as err:
-#         return jsonify({"status": "error", "message": f"Error al crear hogar: {err}"}), 500
-#     finally:
-#         cursor.close()        
 
 
 #esta ruta sirve para consultar los hogares a los que pertenece el usuario
