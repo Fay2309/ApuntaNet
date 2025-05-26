@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='root',
+                                   password='hola12',
                                    host='localhost',
                                    database='apuntanet_db')
 
@@ -84,7 +84,6 @@ def crear_hogar(data):
 
     try:
         cursor = conexion.cursor()
-        # Verifica si el usuario ya pertenece a un hogar
         cursor.execute("SELECT estado FROM usuarios WHERE Id = %s", (id_usuario,))
         estado = cursor.fetchone()
         if estado and estado[0] == 'A':
@@ -94,7 +93,6 @@ def crear_hogar(data):
             INSERT INTO hogar (nombre, descripcion, id_usuario, fecha_creacion, codigo)
             VALUES (%s, %s, %s, NOW(), %s)
         """, (nombre_hogar, descripcion, id_usuario, codigo))
-        # Cambia el estado del usuario a 'A' (activo)
         cursor.execute("UPDATE usuarios SET estado = 'A' WHERE Id = %s", (id_usuario,))
         conexion.commit()
         return jsonify({"status": "Correcto", "message": "Hogar creado exitosamente"}), 201
@@ -115,7 +113,6 @@ def unirse_hogar(data):
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         id_usuario = decoded_token['id_usuario']
 
-        # Verifica si el usuario ya pertenece a un hogar
         cursor.execute("SELECT estado FROM usuarios WHERE Id = %s", (id_usuario,))
         estado = cursor.fetchone()
         if estado and estado[0] == 'A':
@@ -125,7 +122,6 @@ def unirse_hogar(data):
             INSERT INTO casas_usuarios (id_usuario, id_hogar, fecha_ingreso)
             VALUES (%s, (SELECT id FROM hogar WHERE codigo = %s), NOW())
         """, (id_usuario, codigo))
-        # Cambia el estado del usuario a 'A' (activo)
         cursor.execute("UPDATE usuarios SET estado = 'A' WHERE Id = %s", (id_usuario,))
         conexion.commit()
         return jsonify({"status": "Correcto", "message": "Ingreso exitoso"}), 201
@@ -138,22 +134,86 @@ def unirse_hogar(data):
     finally:
         cursor.close()
 
+#esta ruta sirve para consultar los usuarios de un hogar
+#se le pasa el id del hogar, el cual se utiliza para obtener los usuarios de ese hogar
+@Api.route("/hogar/salirse/", methods=['POST'])
+def ruta_salirse_hogar():
+    data = request.get_json()
+    return salirse_hogar(data)
+
+def salirse_hogar(data):
+    raw_token = data.get('token')
+    if not raw_token or not raw_token.startswith("Bearer "):
+        return jsonify({"status": "error", "message": "Token no proporcionado o malformado"}), 401
+
+    token = raw_token.split(" ")[1]
+    try:
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        id_usuario = decoded_token['id_usuario']
+        
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT h.id, h.id_usuario 
+            FROM hogar h
+            INNER JOIN casas_usuarios cu ON cu.id_hogar = h.id
+            WHERE cu.id_usuario = %s
+        """, (id_usuario,))
+        result = cursor.fetchone()
+
+        if not result:
+            return jsonify({"status": "error", "message": "No perteneces a ningún hogar"}), 400
+
+        id_hogar, id_creador = result
+
+        if id_usuario == id_creador:
+            cursor.execute("UPDATE usuarios SET estado = '' WHERE Id IN (SELECT id_usuario FROM casas_usuarios WHERE id_hogar = %s)", (id_hogar,))
+            cursor.execute("DELETE FROM casas_usuarios WHERE id_hogar = %s", (id_hogar,))
+            cursor.execute("DELETE FROM hogar WHERE id = %s", (id_hogar,))
+            cursor.execute("UPDATE usuarios SET estado = '' WHERE Id = %s", (id_usuario,))
+            conexion.commit()
+            return jsonify({"status": "Correcto", "message": "Hogar disuelto exitosamente"}), 200
+        else:
+            cursor.execute("DELETE FROM casas_usuarios WHERE id_usuario = %s AND id_hogar = %s", (id_usuario, id_hogar))
+            cursor.execute("UPDATE usuarios SET estado = '' WHERE Id = %s", (id_usuario,))
+            conexion.commit()
+            return jsonify({"status": "Correcto", "message": "Has salido del hogar"}), 200
+
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+    except jwt.ExpiredSignatureError:
+        return jsonify({"status": "error", "message": "Token expirado"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"status": "error", "message": "Token inválido"}), 401
+    finally:
+        cursor.close()
+
+
 
 #esta ruta sirve para consultar los hogares a los que pertenece el usuario
 #se le pasa el token del usuario, el cual se utiliza para obtener el id del usuario.
-@Api.route("/hogar/consultar/", methods=['POST'])
+@Api.route("/bienvenida", methods=['POST'])
 def consultar_hogar():
-    data = request.get_json()
-    token = data.get('token').split(" ")[1]
-    decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-    id_usuario = decoded_token['id_usuario']
+    auth_header = request.headers.get('Authorization')
+    print("Header de autorización:", auth_header)
+    
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({"status": "error", "message": "Token no proporcionado o inválido"}), 400
+
     try:
+        token = auth_header.split(" ")[1]
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        id_usuario = decoded_token['id_usuario']
         cursor = conexion.cursor()
         cursor.execute("""
             SELECT hogar.id, hogar.nombre, hogar.descripcion, hogar.codigo, hogar.fecha_creacion
             FROM hogar
+            WHERE hogar.id_usuario = %s
+            UNION
+            SELECT hogar.id, hogar.nombre, hogar.descripcion, hogar.codigo, hogar.fecha_creacion
+            FROM hogar
             INNER JOIN casas_usuarios ON hogar.id = casas_usuarios.id_hogar
-            WHERE casas_usuarios.id_usuario = %s""", (id_usuario,))
+            WHERE casas_usuarios.id_usuario = %s
+        """, (id_usuario, id_usuario))
 
         resultados = cursor.fetchall()
         hogares = []
@@ -171,6 +231,7 @@ def consultar_hogar():
         return jsonify({"status": "error", "message": f"Error al consultar hogares: {err}"}), 500
     finally:
         cursor.close()
+
     
 #esta ruta sirve para crear una categoria en la base de datos
 #se le pasa el id del hogar, el nombre de la categoria, la descripcion y el grado de privilegio. la fecha de creacion se le asigna automaticamente la fecha actual

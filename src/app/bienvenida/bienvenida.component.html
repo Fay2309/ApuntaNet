@@ -107,3 +107,11 @@
       </div>
     </div>
   </div>
+
+
+<div *ngIf="nombreHogar">
+  <p>Perteneces al hogar: <strong>{{ nombreHogar }}</strong></p>
+  <button (click)="salirseOHogar()">
+    {{ esCreador ? 'Disolver hogar' : 'Salir del hogar' }}
+  </button>
+</div>

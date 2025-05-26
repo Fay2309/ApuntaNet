@@ -24,6 +24,8 @@ export class BienvenidaComponent implements OnInit {
   public crearHogarForm: FormGroup;
   public ingresarHogarForm: FormGroup;
   public submitted: boolean = false;
+  esCreador: boolean = false;
+  nombreHogar: any;
 
   constructor(private authService: AuthService, 
     private router: Router, 
@@ -42,11 +44,25 @@ export class BienvenidaComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-      const usuario = this.authService.obtenerUsuarioActual();
-      this.nombreUsuario = usuario?.nombre ?? 'Usuario';
-      this.usuarioId = usuario?.id ?? 0;
+ngOnInit(): void {
+    const usuario = this.authService.obtenerUsuarioActual();
+    const token = localStorage.getItem('token');
+    this.nombreUsuario = usuario?.nombre ?? 'Usuario';
+    this.usuarioId = usuario?.id ?? 0;
+
+ if (token) {
+    this.hogarService.obtenerHogarActual(token).subscribe({
+      next: (respuesta) => {
+        console.log('Hogar recibido:', respuesta);
+      },
+      error: (error) => {
+        console.error('Error al obtener el hogar:', error);
+      }
+    });
+  } else {
+    console.error('No se encontró el token en localStorage');
   }
+}
 
   toggleMenu(): void {
     this.menuVisible = !this.menuVisible;
@@ -143,6 +159,32 @@ ingresarHogar(): void {
     this.cdr.detectChanges();
   }
 }
+
+salirseOHogar() {
+  const token = this.authService.getToken();
+  if (!token) return;
+
+  if (this.esCreador) {
+    if (confirm("Eres el creador. ¿Deseas disolver el hogar?")) {
+      this.hogarService.salirseDelHogar(token).subscribe({
+        next: (res: any) => {
+          alert(res.message);
+        },
+        error: (err) => alert(err.error.message)
+      });
+    }
+  } else {
+    if (confirm("¿Seguro que quieres salir del hogar?")) {
+      this.hogarService.salirseDelHogar(token).subscribe({
+        next: (res: any) => {
+          alert(res.message);
+        },
+        error: (err) => alert(err.error.message)
+      });
+    }
+  }
+}
+
 
 
   getMensajeError(controlName: string): string {

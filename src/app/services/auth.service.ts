@@ -64,6 +64,10 @@ obtenerUsuarioActual(): { id: number; nombre: string } | null {
   const usuario = localStorage.getItem('usuario');
   return usuario ? JSON.parse(usuario) : null;
 }
+
+getToken(): string | null {
+  return localStorage.getItem('token');
+}
   
 
   registro(usuario: string, password: string, correo: string, telefono: string): Observable<any> {
