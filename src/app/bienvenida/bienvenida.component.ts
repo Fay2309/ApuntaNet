@@ -5,7 +5,7 @@ import { AuthService } from '../services/auth.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HogarService } from '../services/hogar.service';
 import { unirseHogarService } from '@app/services/unirseHogar.service';
-
+import { RespuestaHogar } from '../bienvenida/bienvenida.interface';
 
 @Component({
   selector: 'app-bienvenida',
@@ -25,7 +25,7 @@ export class BienvenidaComponent implements OnInit {
   public ingresarHogarForm: FormGroup;
   public submitted: boolean = false;
   esCreador: boolean = false;
-  nombreHogar: any;
+  nombreHogar: string | null = null;
 
   constructor(private authService: AuthService, 
     private router: Router, 
@@ -44,21 +44,34 @@ export class BienvenidaComponent implements OnInit {
     });
   }
 
+  // -------------------------------------------------------------------------------------------------------
+  
+  
 ngOnInit(): void {
-    const usuario = this.authService.obtenerUsuarioActual();
-    const token = localStorage.getItem('token');
-    this.nombreUsuario = usuario?.nombre ?? 'Usuario';
-    this.usuarioId = usuario?.id ?? 0;
+ const usuario = this.authService.obtenerUsuarioActual();
+ const token = localStorage.getItem('token');
+ this.nombreUsuario = usuario?.nombre ?? 'Usuario';
+ this.usuarioId = usuario?.id ?? 0;
 
  if (token) {
-    this.hogarService.obtenerHogarActual(token).subscribe({
-      next: (respuesta) => {
-        console.log('Hogar recibido:', respuesta);
-      },
-      error: (error) => {
-        console.error('Error al obtener el hogar:', error);
-      }
-    });
+  this.hogarService.obtenerHogarActual(token).subscribe({
+  next: (respuesta: RespuestaHogar) => {
+    if (respuesta.hogares && respuesta.hogares.length > 0) {
+      const hogar = respuesta.hogares[0];
+      this.nombreHogar = hogar.nombre;
+      this.esCreador = hogar.es_creador;
+      console.log('¿Es creador?:', this.esCreador);
+      console.log('Hogar recibido:', respuesta);
+} else {
+  this.nombreHogar = null;
+  this.esCreador = false;
+  console.log('El usuario no pertenece a ningún hogar.');
+}
+  },
+  error: (error: any) => {
+    console.error('Error al obtener el hogar:', error);
+  }
+});
   } else {
     console.error('No se encontró el token en localStorage');
   }
@@ -111,6 +124,7 @@ crearHogar(): void {
       next: (respuesta) => {
         console.log('Respuesta del servidor:', respuesta);
         this.cerrarModal();
+        window.location.reload();
       },
       error: (error) => {
         if (error.status === 400 && error.error.message) {
@@ -143,6 +157,7 @@ ingresarHogar(): void {
       next: (respuesta) => {
         console.log('Ingreso exitoso al hogar:', respuesta);
         this.cerrarModal();
+        window.location.reload();
       },
       error: (error) => {
         if (error.status === 400 && error.error.message) {
@@ -169,6 +184,7 @@ salirseOHogar() {
       this.hogarService.salirseDelHogar(token).subscribe({
         next: (res: any) => {
           alert(res.message);
+          window.location.reload();
         },
         error: (err) => alert(err.error.message)
       });
@@ -178,14 +194,13 @@ salirseOHogar() {
       this.hogarService.salirseDelHogar(token).subscribe({
         next: (res: any) => {
           alert(res.message);
+          window.location.reload();
         },
         error: (err) => alert(err.error.message)
       });
     }
   }
 }
-
-
 
   getMensajeError(controlName: string): string {
     if (this.error == 1) {
