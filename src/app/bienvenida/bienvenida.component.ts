@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnInit, C
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { firstValueFrom, timeout, catchError, of} from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HogarService } from '../services/hogar.service';
 import { unirseHogarService } from '@app/services/unirseHogar.service';
@@ -26,11 +27,16 @@ export class BienvenidaComponent implements OnInit {
   public submitted: boolean = false;
   esCreador: boolean = false;
   nombreHogar: string | null = null;
+  codigoHogar: string | null = null;
+
+  isLoading: boolean = true;
+  datosUsuarioCargados: boolean = false;
 
   constructor(private authService: AuthService, 
     private router: Router, 
     private elementRef: ElementRef, 
     private cdr: ChangeDetectorRef,
+    private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
     private hogarService: HogarService,
     private unirseHogarService: unirseHogarService
@@ -46,43 +52,79 @@ export class BienvenidaComponent implements OnInit {
 
   // -------------------------------------------------------------------------------------------------------
   
-  
-ngOnInit(): void {
- const usuario = this.authService.obtenerUsuarioActual();
- const token = localStorage.getItem('token');
- this.nombreUsuario = usuario?.nombre ?? 'Usuario';
- this.usuarioId = usuario?.id ?? 0;
+async ngOnInit(): Promise<void> {
+  try {
+    this.isLoading = true;
+    
+    const usuario = this.authService.obtenerUsuarioActual();
+    const token = sessionStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('No se encontró el token en sessionStorage');
+    }
 
- if (token) {
-  this.hogarService.obtenerHogarActual(token).subscribe({
-  next: (respuesta: RespuestaHogar) => {
+    this.nombreUsuario = usuario?.nombre ?? 'Usuario';
+    this.usuarioId = usuario?.id ?? 0;
+
+    
+    const respuesta = await firstValueFrom(this.hogarService.obtenerHogarActual(token));
+    
     if (respuesta.hogares && respuesta.hogares.length > 0) {
       const hogar = respuesta.hogares[0];
       this.nombreHogar = hogar.nombre;
       this.esCreador = hogar.es_creador;
+      this.codigoHogar = hogar.codigo;
       console.log('¿Es creador?:', this.esCreador);
       console.log('Hogar recibido:', respuesta);
-} else {
-  this.nombreHogar = null;
-  this.esCreador = false;
-  console.log('El usuario no pertenece a ningún hogar.');
-}
-  },
-  error: (error: any) => {
-    console.error('Error al obtener el hogar:', error);
+    } else {
+      this.nombreHogar = null;
+      this.esCreador = false;
+      console.log('El usuario no pertenece a ningún hogar.');
+    }
+
+    this.datosUsuarioCargados = true;
+    this.cdRef.markForCheck()
+    
+  } catch (error) {
+    console.error('Error al cargar datos:', error);
+  } finally {
+    this.isLoading = false;
   }
-});
-  } else {
-    console.error('No se encontró el token en localStorage');
+}
+/////
+/* //
+    POR ALGUNA RAZÓN ESTO FUNCIONA, NO TOCAR ALV 
+*/ //
+/////
+ngAfterViewInit(): void {
+  setTimeout(() => {
+    this.cargarDatosIniciales();
+  }, 0);
+}
+
+private async cargarDatosIniciales(): Promise<void> {
+  try {
+    this.isLoading = true;
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    this.isLoading = false;
+    this.cdRef.markForCheck();
   }
 }
+/////
+/* //
+    POR ALGUNA RAZÓN ESTO FUNCIONA, NO TOCAR ALV 
+*/ //
+/////
 
   toggleMenu(): void {
     this.menuVisible = !this.menuVisible;
   }
 
   logout(): void {
-    localStorage.removeItem('usuario');
+    sessionStorage.removeItem('usuario');
+    sessionStorage.removeItem('token');
     this.router.navigate(['/login']); 
   }
 
@@ -146,7 +188,7 @@ ingresarHogar(): void {
   this.submitted = true;
 
   if (this.ingresarHogarForm.valid) {
-    const token = localStorage.getItem('token');  
+    const token = sessionStorage.getItem('token');  
     const datos = {
       accion: 'unirse',
       codigo: this.ingresarHogarForm.value.codigoHogar,
@@ -161,7 +203,7 @@ ingresarHogar(): void {
       },
       error: (error) => {
         if (error.status === 400 && error.error.message) {
-          alert(error.error.message); // Muestra el mensaje del backend
+          alert(error.error.message);
         } else {
           console.error('Error al ingresar al hogar:', error);
         }

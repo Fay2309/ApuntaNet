@@ -16,20 +16,41 @@
 
   <div class="cardbienvenida">
     <div class="bienvenida-container">
+      <p *ngIf="nombreHogar">Perteneces al hogar: <span style="color: #0e7de5;"><strong>{{ nombreHogar }}</strong></span></p>
+      <p *ngIf="esCreador">Código hogar: <span style="color: #0e7de5;"><strong>{{ codigoHogar }}</strong></span></p>
+      <hr *ngIf="nombreHogar">
+
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando información...</p>
+    </div>
       
-        <main class="acciones">
-          <h2>¿Qué deseas hacer?</h2>
-          <div class="botones">
-            <button class="accion" (click)="mostrarModalIngresar()">
-              <span>Ingrese a un hogar</span>
-              <img src="/iniciar-sesion.png" alt="Ingresar" />
-            </button>
-            <button class="accion" (click)="mostrarModalCrear()">
-              <span>Crea un hogar</span>
-              <img src="/casa.png" alt="Crear" />
-            </button>
-          </div>
-        </main>
+    <main class="acciones" *ngIf="!isLoading && datosUsuarioCargados">
+      <h2 *ngIf="!nombreHogar">¿Qué deseas hacer?</h2>
+      <div class="botones" *ngIf="!nombreHogar">
+        <button class="accion" (click)="mostrarModalIngresar()">
+          <span>Ingresar a un hogar</span>
+          <img src="/iniciar-sesion.png" alt="Ingresar" />
+        </button>
+        <button class="accion" (click)="mostrarModalCrear()">
+          <span>Crear un hogar</span>
+          <img src="/casa.png" alt="Crear" />
+        </button>
+      </div>
+
+      <h2 *ngIf="nombreHogar">¿Qué deseas hacer?</h2>
+      <div class="botones" *ngIf="nombreHogar">
+        <button class="accion">
+          <span>Gestionar hogar</span>
+          <img src="/hogar.png" alt="Gestionar" class="concasa" />
+        </button>
+        <button class="accion" (click)="salirseOHogar()">
+          <span>{{ esCreador ? 'Disolver hogar' : 'Salir del hogar' }}</span>
+          <img *ngIf="esCreador" src="/arruinado.png" alt="Salir" class="concasa" />
+          <img *ngIf="!esCreador" src="/puerta-abierta.png" alt="Salir" class="concasa" />
+        </button>
+      </div>
+    </main>
       </div>
     </div>
   </div>
@@ -108,10 +129,3 @@
     </div>
   </div>
 
-
-<div *ngIf="nombreHogar">
-  <p>Perteneces al hogar: <strong>{{ nombreHogar }}</strong></p>
-  <button (click)="salirseOHogar()">
-    {{ esCreador ? 'Disolver hogar' : 'Salir del hogar' }}
-  </button>
-</div>

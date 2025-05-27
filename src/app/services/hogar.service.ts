@@ -15,9 +15,9 @@ export class HogarService {
 
   constructor(private http: HttpClient) {}
 
-  crearHogar(datos: any) {
-    return this.http.post(`${this.apiUrl}`, datos);
-  }
+crearHogar(datos: any) {
+  return this.http.post(`${this.apiUrl}`, datos);
+}
 
 obtenerHogarActual(token: string): Observable<RespuestaHogar> {
   const headers = new HttpHeaders({ 'Content-Type': 'application/json' });

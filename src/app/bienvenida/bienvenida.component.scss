@@ -43,11 +43,24 @@ $terciary-color: #dd2eb1;
 //
 .bienvenida-container {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 2rem;
+    padding:2rem;
     display: flex;
     flex-direction: column;
     gap: 2rem;
   
+    p {
+      margin: -20px 0;
+      margin-bottom: 2px;
+      font-size: 20px;
+      font-weight: 400;
+    }
+    hr{
+      border: 0;
+      height: 3px;
+      background: linear-gradient(to right, $secondary-color, $primary-color);
+      margin:0rem;
+    }
+    
     .header {
       display: flex;
       justify-content: space-between;
@@ -170,8 +183,13 @@ $terciary-color: #dd2eb1;
           transition: all 0.3s ease;
   
           img {
-            width: 70px;
-            height: 70px;
+            width: 72px;
+            height: 72px;
+          }
+
+          .concasa {
+            width: 90px;
+            height: 90px;
           }
   
           &:hover {
@@ -309,4 +327,3 @@ $terciary-color: #dd2eb1;
     background-color: #e8e8e8;
   }
 }
-  

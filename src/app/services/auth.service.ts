@@ -28,11 +28,11 @@ login(usuario: string, password: string): Observable<any> {
             nombre: usuario 
           };
 
-          localStorage.setItem('token', token);
-          localStorage.setItem('usuario', JSON.stringify(usuarioGuardado));
+          sessionStorage.setItem('token', token);
+          sessionStorage.setItem('usuario', JSON.stringify(usuarioGuardado));
 
-          console.log("Token guardado en localStorage:", token);
-          console.log("Usuario guardado en localStorage:", usuarioGuardado);
+          console.log("Token guardado en sessionStorage:", token);
+          console.log("Usuario guardado en sessionStorage:", usuarioGuardado);
           
           observer.next(response);
           observer.complete();
@@ -61,16 +61,15 @@ private decodeToken(token: string): any {
 }
 
 obtenerUsuarioActual(): { id: number; nombre: string } | null {
-  const usuario = localStorage.getItem('usuario');
+  const usuario = sessionStorage.getItem('usuario');
   return usuario ? JSON.parse(usuario) : null;
 }
 
 getToken(): string | null {
-  return localStorage.getItem('token');
+  return sessionStorage.getItem('token');
 }
-  
 
-  registro(usuario: string, password: string, correo: string, telefono: string): Observable<any> {
+registro(usuario: string, password: string, correo: string, telefono: string): Observable<any> {
     const body = { usuario, password, correo, telefono }
 
     return this.http.post(this.apiregistro, body);

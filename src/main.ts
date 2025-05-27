@@ -1,24 +1,23 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
+import { appRouter, routes } from './app/app.routes';
 import { provideRouter } from '@angular/router';
 import { importProvidersFrom } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
 
-import { LoginComponent } from './app/login/login.component';
-import { RegistroComponent } from './app/registro/registro.component';
-import { BienvenidaComponent } from '@app/bienvenida/bienvenida.component';
-import { LandingpageComponent } from '@app/landingpage/landingpage.component';
-bootstrapApplication(AppComponent, {
-  providers: [
-    importProvidersFrom(ReactiveFormsModule),
-    provideHttpClient(),
-    provideRouter([
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
-      { path: 'login', component: LoginComponent },
-      { path: 'registro', component: RegistroComponent },
-      { path: 'bienvenida', component: BienvenidaComponent },
-      { path: 'landingpage', component: LandingpageComponent },
-    ])
+const token = sessionStorage.getItem('token');
+
+const protectedRoutes = ['/bienvenida']; 
+
+if(!token && protectedRoutes.includes(location.pathname)){
+    location.href = '/login';
+} else {
+  bootstrapApplication(AppComponent, {
+    providers: [
+      importProvidersFrom(ReactiveFormsModule),
+      provideHttpClient(),
+      provideRouter(routes)
   ]
-}).catch(err => console.error(err));
+  }).catch(err => console.error(err));
+}
