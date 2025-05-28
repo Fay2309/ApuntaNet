@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `apuntanet_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `apuntanet_db`;
 -- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
 --
 -- Host: localhost    Database: apuntanet_db
@@ -23,14 +25,14 @@ DROP TABLE IF EXISTS `administradores`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `administradores` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `id_usuario` int NOT NULL,
   `id_hogar` int NOT NULL,
   `fecha_auditora` timestamp NOT NULL,
   `grado_privilegio` int NOT NULL,
   PRIMARY KEY (`id`),
+  KEY `usuario_idx` (`id_usuario`),
   KEY `hogar_administrado_idx` (`id_hogar`),
-  KEY `usuario_administrador_idx` (`id_usuario`),
   CONSTRAINT `hogar_administrado` FOREIGN KEY (`id_hogar`) REFERENCES `hogar` (`id`),
   CONSTRAINT `usuario_administrador` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='sirve para almacenar quienes tienen permiso de modificar informacion sensible de las categorias de un hogar al que pertenece';
@@ -54,15 +56,15 @@ DROP TABLE IF EXISTS `casas_usuarios`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `casas_usuarios` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `id_usuario` int NOT NULL,
-  `id_hogar` int NOT NULL,
-  `fecha_ingreso` timestamp NOT NULL,
+  `id_usuario` int DEFAULT NULL,
+  `id_hogar` int DEFAULT NULL,
+  `fecha_ingreso` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_usuario_idx` (`id_usuario`),
   KEY `id_hogar_idx` (`id_hogar`),
   CONSTRAINT `id_hogar` FOREIGN KEY (`id_hogar`) REFERENCES `hogar` (`id`),
   CONSTRAINT `id_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='la tabla de todos los usuarios a los que pertenece un hogar';
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='la tabla de todos los usuarios a los que pertenece un hogar';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,7 +84,7 @@ DROP TABLE IF EXISTS `categoria`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `categoria` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `id_hogar` int NOT NULL,
   `nombre` varchar(45) NOT NULL,
   `descripcion` varchar(45) NOT NULL,
@@ -114,13 +116,13 @@ CREATE TABLE `hogar` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(45) NOT NULL,
   `descripcion` varchar(45) NOT NULL,
-  `creador` int NOT NULL,
+  `id_usuario` int NOT NULL,
   `fecha_creacion` timestamp NOT NULL,
   `codigo` varchar(6) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `creador_idx` (`creador`),
-  CONSTRAINT `creador` FOREIGN KEY (`creador`) REFERENCES `usuarios` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `creador_idx` (`id_usuario`),
+  CONSTRAINT `creador` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -140,7 +142,7 @@ DROP TABLE IF EXISTS `monto_individual`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `monto_individual` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `id_ticket` int NOT NULL,
   `id_usuario` int NOT NULL,
   `porcentaje` decimal(5,2) NOT NULL,
@@ -176,7 +178,7 @@ DROP TABLE IF EXISTS `ticket`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ticket` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `id_categoria` int NOT NULL,
   `nombre` varchar(45) NOT NULL,
   `descripcion` varchar(45) NOT NULL,
@@ -209,11 +211,12 @@ DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `usuario` varchar(45) NOT NULL,
-  `contraseña` varchar(45) NOT NULL,
+  `password` varchar(45) NOT NULL,
   `correo` varchar(45) NOT NULL,
   `telefono` varchar(45) NOT NULL,
+  `estado` varchar(1) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabla con informacion del usuario';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabla con informacion del usuario';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -222,9 +225,17 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'Filiberto','UnaMotomamiPlis','filiberogalvez@gmail.com','6688858358');
+INSERT INTO `usuarios` VALUES (3,'Gael','HOLA12','gaelvalenzuela2309@gmail.com','6682272112',''),(4,'Filiberto','UnaMotomamiPlis1','filiberogalvez@gmail.com','6688858358',''),(5,'Jorge','hola12','jorge@gmail.com','6682542660',NULL);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'apuntanet_db'
+--
+
+--
+-- Dumping routines for database 'apuntanet_db'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -235,4 +246,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-04 13:58:32
+-- Dump completed on 2025-05-27 23:23:01

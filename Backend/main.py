@@ -157,7 +157,6 @@ def salirse_hogar():
 
         if creador_hogar:
             id_hogar = creador_hogar[0]
-            # El usuario es el creador: disolver hogar
             cursor.execute("UPDATE usuarios SET estado = '' WHERE Id IN (SELECT id_usuario FROM casas_usuarios WHERE id_hogar = %s)", (id_hogar,))
             cursor.execute("DELETE FROM casas_usuarios WHERE id_hogar = %s", (id_hogar,))
             cursor.execute("DELETE FROM hogar WHERE id = %s", (id_hogar,))
@@ -165,7 +164,6 @@ def salirse_hogar():
             conexion.commit()
             return jsonify({"status": "Correcto", "message": "Hogar disuelto exitosamente"}), 200
 
-        # 2. Si no es creador, verificar si está en casas_usuarios
         cursor.execute("SELECT id_hogar FROM casas_usuarios WHERE id_usuario = %s", (id_usuario,))
         miembro_hogar = cursor.fetchone()
 
