@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='hola12',
+                                   password='root',
                                    host='localhost',
                                    database='apuntanet_db')
 
@@ -149,7 +149,7 @@ def salirse_hogar():
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         id_usuario = decoded_token['id_usuario']
         
-        cursor = conexion.cursor()
+        cursor = conexion.cursor() 
 
         # 1. Verificar si el usuario es el creador
         cursor.execute("SELECT id FROM hogar WHERE id_usuario = %s", (id_usuario,))
