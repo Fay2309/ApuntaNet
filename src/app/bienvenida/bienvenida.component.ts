@@ -6,7 +6,6 @@ import { firstValueFrom, timeout, catchError, of} from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HogarService } from '../services/hogar.service';
 import { unirseHogarService } from '@app/services/unirseHogar.service';
-import { RespuestaHogar } from '../bienvenida/bienvenida.interface';
 
 @Component({
   selector: 'app-bienvenida',
@@ -39,7 +38,7 @@ export class BienvenidaComponent implements OnInit {
     private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
     private hogarService: HogarService,
-    private unirseHogarService: unirseHogarService
+    private unirseHogarService: unirseHogarService,
   ) {
     this.crearHogarForm = this.fb.group({
       nombreHogar: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
@@ -51,6 +50,7 @@ export class BienvenidaComponent implements OnInit {
   }
 
   // -------------------------------------------------------------------------------------------------------
+  
   
 async ngOnInit(): Promise<void> {
   try {
@@ -74,6 +74,7 @@ async ngOnInit(): Promise<void> {
       this.nombreHogar = hogar.nombre;
       this.esCreador = hogar.es_creador;
       this.codigoHogar = hogar.codigo;
+      this.enviarNombreHogar(this.nombreHogar);
       console.log('¿Es creador?:', this.esCreador);
       console.log('Hogar recibido:', respuesta);
     } else {
@@ -126,6 +127,10 @@ private async cargarDatosIniciales(): Promise<void> {
     sessionStorage.removeItem('usuario');
     sessionStorage.removeItem('token');
     this.router.navigate(['/login']); 
+  }
+
+  enviarNombreHogar(nombre: string) {
+    this.hogarService.setNombreHogar(nombre);
   }
 
 // -------------------------------------------------------------------------------------------------------
@@ -286,4 +291,5 @@ salirseOHogar() {
       this.cerrarModal();
     }
   }
+
 }

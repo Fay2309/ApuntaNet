@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { RespuestaHogar } from '../bienvenida/bienvenida.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -32,4 +33,16 @@ salirseDelHogar(token: string) {
   });
 }
 
+  private nombreHogarSubject = new BehaviorSubject<string>('');
+  nombreHogar$ = this.nombreHogarSubject.asObservable();
+
+  setNombreHogar(nombre: string) {
+    this.nombreHogarSubject.next(nombre);
+  }
+
+  getNombreHogar(): string {
+    return this.nombreHogarSubject.value;
+  }
 }
+
+
