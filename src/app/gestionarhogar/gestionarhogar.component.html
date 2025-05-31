@@ -1,17 +1,41 @@
+<div class="bienvenida-container">
+  <header class="header">
+    <div class="logo">
+      <img src="/verificacion.png" alt="Logo" />
+      <span class="titulo">ApuntaNet</span>
+    </div>
+  </header>
+
 <div class="hogar-fondo">
   <div class="hogar-container">
     <div class="hogar-titulo" style="margin-bottom: 1rem;">
-      Perteneces al hogar: 
-      <span class="hogar-nombre"><strong>{{ nombreHogar }}</strong></span>
+      <p>Gestionando el hogar: <span class="hogar-nombre"><strong>{{ nombreHogar }}</strong></span></p>
     </div>
     <div class="hogar-main">
       <nav class="hogar-menu">
-        <button class="menu-btn activo">Control de Gastos</button>
-        <button class="menu-btn">Residentes</button>
-        <button class="menu-btn">Volver</button>
+        <button 
+          class="menu-btn"
+          [ngClass]="{ 'activo': seccionActiva === 'gastos' }"
+          (click)="seccionActiva = 'gastos'">Control de Gastos</button>
+
+        <button 
+          class="menu-btn"
+          [ngClass]="{ 'activo': seccionActiva === 'residentes' }"
+          (click)="mostrarResidentes()">Residentes</button>
+
+        <button class="menu-btn" routerLink="/bienvenida">Volver</button>
       </nav>
       <section class="hogar-contenido">
-        
+        <div *ngIf="residentes.length > 0">
+          <h3>Residentes:</h3>
+          <ul>
+            <li *ngFor="let r of residentes">
+              <strong>{{ r.usuario }}</strong> <span *ngIf="r.es_creador" class="creador-tag"> (Creador)</span><br>
+              {{ r.correo }}<br>
+              <small>Fecha de ingreso: {{ r.fecha | date:'mediumDate' }}</small>
+            </li>
+          </ul>
+        </div>
       </section>
     </div>
   </div>

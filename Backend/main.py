@@ -201,7 +201,7 @@ def consultar_hogar():
 
         hogares = []
 
-        # Hogares donde el usuario es el creador
+        # CREADOR
         cursor.execute("""
             SELECT hogar.id, hogar.nombre, hogar.descripcion, hogar.codigo, hogar.fecha_creacion
             FROM hogar
@@ -217,7 +217,7 @@ def consultar_hogar():
                 'es_creador': True
             })
 
-        # Hogares donde el usuario solo está unido
+        # UNIDO
         cursor.execute("""
             SELECT hogar.id, hogar.nombre, hogar.descripcion, hogar.codigo, hogar.fecha_creacion
             FROM hogar
@@ -241,7 +241,35 @@ def consultar_hogar():
     finally:
         cursor.close()
 
+#esta ruta sirve para obtener los residentes de un hogar
+#se le pasa el id del hogar, el cual se utiliza para obtener los residentes de ese hogar
+@Api.route('/hogar/residentes/<int:id_hogar>', methods=['GET'])
+def obtener_residentes(id_hogar):
+    cursor = conexion.cursor(dictionary=True)
+    try:
+        # CREADOR
+        cursor.execute("""
+            SELECT u.Id AS id, u.usuario, u.correo, h.fecha_creacion AS fecha, TRUE AS es_creador
+            FROM usuarios u
+            JOIN hogar h ON u.Id = h.id_usuario
+            WHERE h.id = %s
+        """, (id_hogar,))
+        residentes = cursor.fetchall()
 
+        # UNIDOS
+        cursor.execute("""
+            SELECT u.Id AS id, u.usuario, u.correo, cu.fecha_ingreso AS fecha, FALSE AS es_creador
+            FROM usuarios u
+            JOIN casas_usuarios cu ON u.Id = cu.id_usuario
+            WHERE cu.id_hogar = %s
+        """, (id_hogar,))
+        residentes += cursor.fetchall()
+
+        return jsonify({"status": "Correcto", "residentes": residentes}), 200
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error al obtener residentes: {err}"}), 500
+    finally:
+        cursor.close()       
     
 #esta ruta sirve para crear una categoria en la base de datos
 #se le pasa el id del hogar, el nombre de la categoria, la descripcion y el grado de privilegio. la fecha de creacion se le asigna automaticamente la fecha actual

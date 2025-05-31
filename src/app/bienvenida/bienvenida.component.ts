@@ -75,6 +75,9 @@ async ngOnInit(): Promise<void> {
       this.esCreador = hogar.es_creador;
       this.codigoHogar = hogar.codigo;
       this.enviarNombreHogar(this.nombreHogar);
+      this.enviarIdHogar(hogar.id); 
+      sessionStorage.setItem('idHogar', String(hogar.id));
+      sessionStorage.setItem('nombreHogar', this.nombreHogar);
       console.log('¿Es creador?:', this.esCreador);
       console.log('Hogar recibido:', respuesta);
     } else {
@@ -131,6 +134,10 @@ private async cargarDatosIniciales(): Promise<void> {
 
   enviarNombreHogar(nombre: string) {
     this.hogarService.setNombreHogar(nombre);
+  }
+
+  enviarIdHogar(id: number) {
+    this.hogarService.setIdHogar(id);
   }
 
 // -------------------------------------------------------------------------------------------------------

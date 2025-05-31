@@ -43,7 +43,7 @@ $terciary-color: #dd2eb1;
 //
 .bienvenida-container {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding:2rem;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -51,8 +51,8 @@ $terciary-color: #dd2eb1;
     p {
       margin: -20px 0;
       margin-bottom: 2px;
-      font-size: 20px;
-      font-weight: 400;
+      font-size: 1.5rem;
+      font-weight: 700;
     }
     hr{
       border: 0;

@@ -13,6 +13,7 @@ export class HogarService {
   private apiUrl = 'http://localhost:5000/bienvenida'; 
   private apiconsultarhogar = 'http://localhost:5000/consultarHogar';
   private apisalirHogar = 'http://localhost:5000/salirHogar';
+  private apiresidentes = 'http://localhost:5000';
 
   constructor(private http: HttpClient) {}
 
@@ -33,8 +34,17 @@ salirseDelHogar(token: string) {
   });
 }
 
+getResidentes(idHogar: number) {
+  return this.http.get<{ status: string, residentes: any[] }>(
+    `${this.apiresidentes}/hogar/residentes/${idHogar}`
+  );
+}
+
   private nombreHogarSubject = new BehaviorSubject<string>('');
   nombreHogar$ = this.nombreHogarSubject.asObservable();
+
+  private idHogarSubject = new BehaviorSubject<number | null>(null);
+  idHogar$ = this.idHogarSubject.asObservable();
 
   setNombreHogar(nombre: string) {
     this.nombreHogarSubject.next(nombre);
@@ -42,6 +52,14 @@ salirseDelHogar(token: string) {
 
   getNombreHogar(): string {
     return this.nombreHogarSubject.value;
+  }
+
+  setIdHogar(id: number) {
+    this.idHogarSubject.next(id);
+  }
+
+  getIdHogar(): number | null {
+    return this.idHogarSubject.value;
   }
 }
 
