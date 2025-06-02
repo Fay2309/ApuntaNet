@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='hola12',
+                                   password='root',
                                    host='localhost',
                                    database='apuntanet_db')
 
