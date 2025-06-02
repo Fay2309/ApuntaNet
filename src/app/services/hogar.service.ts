@@ -46,6 +46,9 @@ getResidentes(idHogar: number) {
   private idHogarSubject = new BehaviorSubject<number | null>(null);
   idHogar$ = this.idHogarSubject.asObservable();
 
+  private esCreadorSubject = new BehaviorSubject<boolean>(false);
+  esCreador$ = this.esCreadorSubject.asObservable();
+
   setNombreHogar(nombre: string) {
     this.nombreHogarSubject.next(nombre);
   }
@@ -60,6 +63,14 @@ getResidentes(idHogar: number) {
 
   getIdHogar(): number | null {
     return this.idHogarSubject.value;
+  }
+
+  setEsCreador(esCreador: boolean) {
+    this.esCreadorSubject.next(esCreador);
+  }
+
+  getEsCreador(): boolean {
+    return this.esCreadorSubject.value;
   }
 }
 
