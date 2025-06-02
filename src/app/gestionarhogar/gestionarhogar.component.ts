@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { HogarService } from '@app/services/hogar.service';
+import jsPDF from 'jspdf';
 
 
 @Component({
@@ -141,5 +142,11 @@ export class GestionarhogarComponent {
         !target.closest('.accion')) {  
       this.cerrarModal();
     }
+  }
+
+  generarPDF() {
+    const doc = new jsPDF();
+    doc.text('ya jala', 20, 20);
+    doc.save('monto-individual.pdf');
   }
 }

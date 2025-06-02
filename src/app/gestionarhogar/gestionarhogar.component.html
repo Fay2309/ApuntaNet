@@ -33,8 +33,8 @@
             <button type="button" class="btn-primary centro" (click)="mostrarModalCategoria(); $event.stopPropagation()">Crear categoria</button>
 
             <button class="btn-primary izquierda">Generar ticket</button>
-            <button class="btn-primary derecha">
-            {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
+            <button class="btn-primary derecha" (click)="generarPDF()">
+              {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
             </button>
             <button *ngIf="esCreador" class="btn-primary centro">Revisar Ticket</button>
           </div>
