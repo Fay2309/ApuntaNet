@@ -31,5 +31,20 @@ WHERE
 ORDER BY 
 	monto_individual.fecha_expiracion ASC
 ;
+
+#de esta manera se pueden ver los datos que no han sido encriptados pero si esten en una columna de tipo BLOB 
+SELECT id, usuario ,cast(password AS CHAR) as password,cast(correo AS CHAR) as correo,cast(telefono AS CHAR) as telefono FROM usuarios;
+
+#de esta manera se desencripta y da formato
+SELECT
+	id,
+	usuario ,
+	cast(aes_decrypt(password,'UnaDeCasaParaElGaelPlis') AS CHAR) as password,
+	cast(aes_decrypt(correo,'UnaDeCasaParaElGaelPlis') AS CHAR) as correo,
+	cast(aes_decrypt(telefono,'UnaDeCasaParaElGaelPlis') AS CHAR) as telefono
+FROM usuarios;
+;
+
 SET FOREIGN_KEY_CHECKS = 1; #sirve para desctivar las foreing keys
 
+ALTER TABLE usuarios AUTO_INCREMENT =8; # actualizar el auto incrementable de una tabla

@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='hola12',
+                                   password='201614',
                                    host='localhost',
                                    database='apuntanet_db')
 
@@ -25,8 +25,8 @@ def login():
     cursor = conexion.cursor()
     cursor.execute("""SELECT id,usuario, password 
                    FROM usuarios 
-                   WHERE usuario = %s AND password = %s"""
-                   , (usuario, password))
+                   WHERE usuario = %s AND password = AES_ENCRYPT(%s, %s)"""
+                   , (usuario, password, SECRET_KEY))
     resultado = cursor.fetchone()
     cursor.close()
 
@@ -54,9 +54,16 @@ def registro ():
     try:
         cursor = conexion.cursor()
         cursor.execute("""
-            INSERT INTO usuarios (usuario, password, correo, telefono)
-            VALUES (%s, %s, %s, %s)""", 
-            (usuario, password, correo, telefono))
+             INSERT INTO usuarios (usuario, password, correo, telefono)
+            VALUES (%s, 
+                    aes_encrypt(%s, %s), 
+                    aes_encrypt (%s, %s),
+                    aes_encrypt(%s, %s));
+        """, 
+            (usuario,
+             password, SECRET_KEY,
+             correo, SECRET_KEY,
+             telefono, SECRET_KEY))
         conexion.commit()  # Confirma los cambios en la base de datos
         return jsonify({"status": "Correcto", "message": "Usuario registrado exitosamente"}), 201
     except mysql.connector.Error as err:
@@ -249,20 +256,32 @@ def obtener_residentes(id_hogar):
     try:
         # CREADOR
         cursor.execute("""
-            SELECT u.Id AS id, u.usuario, u.correo, h.fecha_creacion AS fecha, TRUE AS es_creador
-            FROM usuarios u
-            JOIN hogar h ON u.Id = h.id_usuario
-            WHERE h.id = %s
-        """, (id_hogar,))
+            SELECT 
+                u.Id AS id, 
+                u.usuario, 
+                CAST(AES_DECRYPT(u.correo, %s) AS CHAR) AS correo,
+                CAST(AES_DECRYPT(u.telefono, %s) AS CHAR) AS telefono,
+                h.fecha_creacion AS fecha, 
+                TRUE AS es_creador
+                FROM usuarios u
+                JOIN hogar h ON u.Id = h.id_usuario
+                WHERE h.id = %s
+        """, (SECRET_KEY, SECRET_KEY, id_hogar,))
         residentes = cursor.fetchall()
 
         # UNIDOS
         cursor.execute("""
-            SELECT u.Id AS id, u.usuario, u.correo, cu.fecha_ingreso AS fecha, FALSE AS es_creador
+            SELECT     
+                u.Id AS id, 
+                u.usuario, 
+                CAST(AES_DECRYPT(u.correo, %s) AS CHAR) AS correo,
+                CAST(AES_DECRYPT(u.telefono, %s)AS CHAR) AS telefono, 
+                cu.fecha_ingreso AS fecha, 
+                FALSE AS es_creador
             FROM usuarios u
             JOIN casas_usuarios cu ON u.Id = cu.id_usuario
             WHERE cu.id_hogar = %s
-        """, (id_hogar,))
+        """, (SECRET_KEY,SECRET_KEY, id_hogar,))
         residentes += cursor.fetchall()
 
         return jsonify({"status": "Correcto", "residentes": residentes}), 200
