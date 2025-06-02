@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnInit, C
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { firstValueFrom, timeout, catchError, of} from 'rxjs';
+import { firstValueFrom} from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HogarService } from '../services/hogar.service';
 import { unirseHogarService } from '@app/services/unirseHogar.service';
@@ -76,8 +76,11 @@ async ngOnInit(): Promise<void> {
       this.codigoHogar = hogar.codigo;
       this.enviarNombreHogar(this.nombreHogar);
       this.enviarIdHogar(hogar.id); 
+
       sessionStorage.setItem('idHogar', String(hogar.id));
       sessionStorage.setItem('nombreHogar', this.nombreHogar);
+      sessionStorage.setItem('esCreador', String(this.esCreador));
+
       console.log('¿Es creador?:', this.esCreador);
       console.log('Hogar recibido:', respuesta);
     } else {
@@ -182,7 +185,7 @@ crearHogar(): void {
       },
       error: (error) => {
         if (error.status === 400 && error.error.message) {
-          alert(error.error.message); // Muestra el mensaje del backend
+          alert(error.error.message);
         } else {
           console.error('Error al crear hogar:', error);
         }

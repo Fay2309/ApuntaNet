@@ -26,7 +26,22 @@
         <button class="menu-btn" routerLink="/bienvenida">Volver</button>
       </nav>
       <section class="hogar-contenido">
-        <div *ngIf="residentes.length > 0">
+          <!-- SECCIÓN DE CONTROL DE GASTOS -->
+        <div *ngIf="seccionActiva === 'gastos'">
+          <h3>Control de Gastos</h3>
+          <div class="grid-gastos">
+            <button type="button" class="btn-primary centro" (click)="mostrarModalCategoria(); $event.stopPropagation()">Crear categoria</button>
+
+            <button class="btn-primary izquierda">Generar ticket</button>
+            <button class="btn-primary derecha">
+            {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
+            </button>
+            <button *ngIf="esCreador" class="btn-primary centro">Revisar Ticket</button>
+          </div>
+        </div>
+
+        <!-- SECCIÓN DE CONTROL DE RESIDENTES -->
+        <div *ngIf="seccionActiva === 'residentes' && residentes.length > 0">
           <h3>Residentes:</h3>
           <ul>
             <li *ngFor="let r of residentes">
@@ -40,3 +55,46 @@
     </div>
   </div>
 </div>
+
+<!--  -->
+<!-- SECCCIÓN DE CREAR CATEGORIA -->
+ <!--  -->
+  <div class="modal-fondo" *ngIf="modalVisible==1 && error==1">
+    <div class="modal-contenido" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Crear nueva categoria</h3>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="crearCategoriaForm">
+          <div class="form-grupo">
+            <label for="nombreCategoria">Nombre categoria *</label>
+            <input 
+              type="text" 
+              id="nombreCategoria"
+              formControlName="nombreCategoria"
+              [class.error]="(crearCategoriaForm.get('nombreCategoria')?.touched || submitted) && crearCategoriaForm.get('nombreCategoria')?.invalid"
+            >
+            <div class="mensaje-error" *ngIf="getMensajeError('nombreCategoria')">
+              {{ getMensajeError('nombreCategoria') }}
+            </div>
+          </div>
+          <div class="form-grupo">
+            <label for="descripcion">Descripción</label>
+            <textarea 
+              id="descripcion" 
+              formControlName="descripcion"
+              rows="4"
+              [class.error]="(crearCategoriaForm.get('descripcion')?.touched || submitted) && crearCategoriaForm.get('descripcion')?.invalid"
+            ></textarea>
+            <div class="mensaje-error" *ngIf="getMensajeError('descripcion')">
+              {{ getMensajeError('descripcion') }}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn-primary">Crear categoria</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
