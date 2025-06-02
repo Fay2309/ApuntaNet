@@ -31,7 +31,6 @@
           <h3>Control de Gastos</h3>
           <div class="grid-gastos">
             <button type="button" class="btn-primary centro" (click)="mostrarModalCategoria(); $event.stopPropagation()">Crear categoria</button>
-
             <button class="btn-primary izquierda">Generar ticket</button>
             <button class="btn-primary derecha" (click)="generarPDF()">
               {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
@@ -41,15 +40,16 @@
         </div>
 
         <!-- SECCIÓN DE CONTROL DE RESIDENTES -->
-        <div *ngIf="seccionActiva === 'residentes' && residentes.length > 0">
-          <h3>Residentes:</h3>
-          <ul>
-            <li *ngFor="let r of residentes">
-              <strong>{{ r.usuario }}</strong> <span *ngIf="r.es_creador" class="creador-tag"> (Creador)</span><br>
+        <div *ngIf="seccionActiva === 'residentes' && residentes.length > 0" class="seccion-residentes">
+          <div class="grid-residentes">
+            <div class="tarjeta-residente" *ngFor="let r of residentes">
+              <strong>{{ r.usuario }}</strong>
+              <span *ngIf="r.es_creador" class="creador-tag"> (Creador)</span><br>
               {{ r.correo }}<br>
+              {{ r.telefono }}<br>
               <small>Fecha de ingreso: {{ r.fecha | date:'mediumDate' }}</small>
-            </li>
-          </ul>
+            </div>
+          </div>
         </div>
       </section>
     </div>
