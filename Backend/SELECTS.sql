@@ -45,6 +45,36 @@ SELECT
 FROM usuarios;
 ;
 
+
+
+
+###corregir BK con encriptacion
+UPDATE usuarios
+SET password = AES_ENCRYPT('HOLA12', 'UnaDeCasaParaElGaelPlis'),
+correo = aes_encrypt('gaelvalenzuela2309@gmail.com','UnaDeCasaParaElGaelPlis'),
+telefono=aes_encrypt('6682272112','UnaDeCasaParaElGaelPlis')
+WHERE id = 3;
+
+UPDATE usuarios
+SET password = AES_ENCRYPT('UnaMotomamiPlis1', 'UnaDeCasaParaElGaelPlis'),
+correo = aes_encrypt('filiberogalvez@gmail.com','UnaDeCasaParaElGaelPlis'),
+telefono=aes_encrypt('6688858358','UnaDeCasaParaElGaelPlis')
+WHERE id = 4;
+
+
+UPDATE usuarios
+SET password = AES_ENCRYPT('hola12', 'UnaDeCasaParaElGaelPlis'),
+correo = aes_encrypt('jorge@gmail.com','UnaDeCasaParaElGaelPlis'),
+telefono=aes_encrypt('6682542660','UnaDeCasaParaElGaelPlis')
+WHERE id = 5;
+
+
+UPDATE usuarios
+SET password = AES_ENCRYPT('tarea03', 'UnaDeCasaParaElGaelPlis'),
+correo = aes_encrypt('angul0alan@gmail.com','UnaDeCasaParaElGaelPlis'),
+telefono=aes_encrypt('6674473565','UnaDeCasaParaElGaelPlis')
+WHERE id = 6;
+
 SET FOREIGN_KEY_CHECKS = 1; #sirve para desctivar las foreing keys
 
 ALTER TABLE usuarios AUTO_INCREMENT =8; # actualizar el auto incrementable de una tabla
