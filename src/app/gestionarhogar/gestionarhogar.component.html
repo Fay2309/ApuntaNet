@@ -32,12 +32,14 @@
           <div class="grid-gastos-tres-columnas">
             <button type="button" class="btn-primary" (click)="mostrarModalCategoria(); $event.stopPropagation()">Crear categoria</button>
             <button class="btn-primary">Generar ticket</button>
-            <button class="btn-primary">Generar reporte individual</button>
-            <button *ngIf="esCreador" class="btn-primary">Revisar Ticket</button>
             <button class="btn-primary" (click)="generarPDF()">
+              Generar reporte individual
+            </button>
+            <button *ngIf="esCreador" class="btn-primary">Revisar Ticket</button>
+            <button class="btn-primary">
               {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
             </button>
-            <button class="btn-primary">Generar reporte del hogar</button>
+            <button class="btn-primary" (click)="generarPDFgrupal()">Generar reporte del hogar</button>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angula
 import { Subscription } from 'rxjs';
 import { HogarService } from '@app/services/hogar.service';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 
 @Component({
@@ -150,41 +151,252 @@ export class GestionarhogarComponent {
   }
 
   generarPDF() {
-      const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
 
-  // Título del reporte
-  doc.setFontSize(18);
-  doc.text('Reporte de Monto Individual', 105, 20, { align: 'center' });
+    // Fecha actual
+    const fecha = new Date();
+    const fechaStr = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
 
-  // Fecha actual
-  const fecha = new Date().toLocaleDateString();
-  doc.setFontSize(11);
-  doc.text(`Fecha: ${fecha}`, 20, 30);
+    // Título principal
+    doc.setTextColor(173, 216, 230);
+    doc.setFontSize(26);
+    doc.text('Reporte Individual de hogar', 60, 70);
 
-  // Línea separadora
-  doc.line(20, 35, 190, 35); // línea horizontal
+    // Línea
+    doc.setDrawColor(173, 216, 230);
+    doc.line(60, 80, 500, 80);
 
-  // Sección: Resumen
-  doc.setFontSize(14);
-  doc.text('Resumen', 20, 45);
-  doc.setFontSize(11);
-  doc.text('Este reporte presenta un resumen del monto individual correspondiente.', 20, 52);
+    // Datos generales
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text(`Fecha: ${fechaStr}`, 60, 100);
+    doc.text('Responsable: Colio Ochoa', 60, 120);
 
-  // Sección: Detalles
-  doc.setFontSize(14);
-  doc.text('Detalles del Reporte', 20, 65);
-  doc.setFontSize(11);
-  doc.text(`- Usuario: alan`, 25, 72);
-  doc.text('- Monto calculado: $1,200.00 MXN', 25, 79);
-  doc.text('- Periodo: Mayo 2025', 25, 86);
+    // Resumen Ejecutivo
+    doc.setTextColor(100, 180, 255);
+    doc.setFontSize(14);
+    doc.text('Resumen del reporte', 60, 150);
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text('Reporte generado desde el portal. Cualquier duda consultarlo con su administrador de hogar.', 60, 170);
 
-  // Sección: Conclusión
-  doc.setFontSize(14);
-  doc.text('Conclusión', 20, 100);
-  doc.setFontSize(11);
-  doc.text('El monto ha sido determinado con base en los datos registrados en el sistema.', 20, 107);
+    // --- Categoría: Renta ---
+    let y = 200;
+    doc.setTextColor(100, 180, 255);
+    doc.setFontSize(14);
+    doc.text('Categoría: Renta', 60, y);
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text('Descripción:', 60, y + 20);
+    doc.text('Renta del hogar', 130, y + 20);
 
-  // Guardar el documento
-  doc.save('reporte-monto-individual.pdf');
+    autoTable(doc, {
+      startY: y + 35,
+      head: [['#', 'Costo', 'Descripción', 'Comentarios']],
+      body: [
+        ['1', '1500', 'Renta mensual', 'Que caro'],
+      ],
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [60, 60, 60],
+        lineColor: [60, 60, 60],
+        halign: 'center'
+      },
+      headStyles: {
+        fillColor: [40, 40, 40],
+        textColor: [255, 100, 100],
+        fontStyle: 'bold'
+      },
+      margin: { left: 60, right: 60 }
+    });
+
+    // --- Categoría: Servicios ---
+    y = (doc as any).lastAutoTable.finalY + 30;
+    doc.setTextColor(100, 180, 255);
+    doc.setFontSize(14);
+    doc.text('Categoría: Servicios', 60, y);
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text('Descripción:', 60, y + 20);
+    doc.text('Servicios de streaming', 130, y + 20);
+
+    autoTable(doc, {
+      startY: y + 35,
+      head: [['#', 'Costo', 'Descripción', 'Comentarios']],
+      body: [
+        ['1', '50', 'neflis', 'uwu'],
+        ['2', '50', 'prime', '7w7'],
+      ],
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [60, 60, 60],
+        lineColor: [60, 60, 60],
+        halign: 'center'
+      },
+      headStyles: {
+        fillColor: [40, 40, 40],
+        textColor: [255, 100, 100],
+        fontStyle: 'bold'
+      },
+      margin: { left: 60, right: 60 }
+    });
+   // --- Categoría: Servicios importantes ---
+    y = (doc as any).lastAutoTable.finalY + 30;
+    doc.setTextColor(100, 180, 255);
+    doc.setFontSize(14);
+    doc.text('Categoría: Servicios importantes', 60, y);
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text('Descripción:', 60, y + 20);
+    doc.text('Servicios de agua,luz,gas', 130, y + 20);
+
+    autoTable(doc, {
+      startY: y + 35,
+      head: [['#', 'Costo', 'Descripción', 'Comentarios']],
+      body: [
+        ['1', '200', 'luz', 'uwu'],
+        ['2', '50', 'agua', '7w7'],
+        ['3', '70', 'gas', '7w7'],
+      ],
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [60, 60, 60],
+        lineColor: [60, 60, 60],
+        halign: 'center'
+      },
+      headStyles: {
+        fillColor: [40, 40, 40],
+        textColor: [255, 100, 100],
+        fontStyle: 'bold'
+      },
+      margin: { left: 60, right: 60 }
+    });
+
+    doc.save('reporte-individual.pdf');
+  }
+  generarPDFgrupal() {
+    const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+
+    // Fecha actual
+    const fecha = new Date();
+    const fechaStr = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
+
+    // Título principal
+    doc.setTextColor(173, 216, 230);
+    doc.setFontSize(26);
+    doc.text('Reporte Individual de hogar', 60, 70);
+
+    // Línea
+    doc.setDrawColor(173, 216, 230);
+    doc.line(60, 80, 500, 80);
+
+    // Datos generales
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text(`Fecha: ${fechaStr}`, 60, 100);
+    doc.text('Responsable: admin', 60, 120);
+
+    // Resumen Ejecutivo
+    doc.setTextColor(100, 180, 255);
+    doc.setFontSize(14);
+    doc.text('Resumen del reporte', 60, 150);
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text('Reporte generado desde el portal. Cualquier duda consultarlo con su administrador de hogar.', 60, 170);
+
+    // --- Categoría: Renta ---
+    let y = 200;
+    doc.setTextColor(100, 180, 255);
+    doc.setFontSize(14);
+    doc.text('Categoría: Renta', 60, y);
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text('Descripción:', 60, y + 20);
+    doc.text('Renta del hogar', 130, y + 20);
+
+    autoTable(doc, {
+      startY: y + 35,
+      head: [['usuario', '#', 'Costo', 'Descripción', 'Comentarios']],
+      body: [
+        ['colio','1', '1500', 'Renta mensual', 'Que caro'],
+      ],
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [60, 60, 60],
+        lineColor: [60, 60, 60],
+        halign: 'center'
+      },
+      headStyles: {
+        fillColor: [40, 40, 40],
+        textColor: [255, 100, 100],
+        fontStyle: 'bold'
+      },
+      margin: { left: 60, right: 60 }
+    });
+
+    // --- Categoría: Servicios ---
+    y = (doc as any).lastAutoTable.finalY + 30;
+    doc.setTextColor(100, 180, 255);
+    doc.setFontSize(14);
+    doc.text('Categoría: Servicios', 60, y);
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text('Descripción:', 60, y + 20);
+    doc.text('Servicios de streaming', 130, y + 20);
+
+    autoTable(doc, {
+      startY: y + 35,
+      head: [['usuario', '#', 'Costo', 'Descripción', 'Comentarios']],
+      body: [
+        ['colio','1', '50', 'neflis', 'uwu'],
+        ['colio','2', '50', 'prime', '7w7'],
+      ],
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [60, 60, 60],
+        lineColor: [60, 60, 60],
+        halign: 'center'
+      },
+      headStyles: {
+        fillColor: [40, 40, 40],
+        textColor: [255, 100, 100],
+        fontStyle: 'bold'
+      },
+      margin: { left: 60, right: 60 }
+    });
+   // --- Categoría: Servicios importantes ---
+    y = (doc as any).lastAutoTable.finalY + 30;
+    doc.setTextColor(100, 180, 255);
+    doc.setFontSize(14);
+    doc.text('Categoría: Servicios importantes', 60, y);
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(12);
+    doc.text('Descripción:', 60, y + 20);
+    doc.text('Servicios de agua,luz,gas', 130, y + 20);
+
+    autoTable(doc, {
+      startY: y + 35,
+      head: [['colio','#', 'Costo', 'Descripción', 'Comentarios']],
+      body: [
+        ['colio','1', '200', 'luz', 'uwu'],
+        ['colio','2', '50', 'agua', '7w7'],
+        ['colio','3', '70', 'gas', '7w7'],
+      ],
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [60, 60, 60],
+        lineColor: [60, 60, 60],
+        halign: 'center'
+      },
+      headStyles: {
+        fillColor: [40, 40, 40],
+        textColor: [255, 100, 100],
+        fontStyle: 'bold'
+      },
+      margin: { left: 60, right: 60 }
+    });
+
+    doc.save('reporte-grupal.pdf');
   }
 }
+
