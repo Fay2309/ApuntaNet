@@ -29,13 +29,15 @@
           <!-- SECCIÓN DE CONTROL DE GASTOS -->
         <div *ngIf="seccionActiva === 'gastos'">
           <h3>Control de Gastos</h3>
-          <div class="grid-gastos">
-            <button type="button" class="btn-primary centro" (click)="mostrarModalCategoria(); $event.stopPropagation()">Crear categoria</button>
-            <button class="btn-primary izquierda">Generar ticket</button>
-            <button class="btn-primary derecha" (click)="generarPDF()">
+          <div class="grid-gastos-tres-columnas">
+            <button type="button" class="btn-primary" (click)="mostrarModalCategoria(); $event.stopPropagation()">Crear categoria</button>
+            <button class="btn-primary">Generar ticket</button>
+            <button class="btn-primary">Generar reporte individual</button>
+            <button *ngIf="esCreador" class="btn-primary">Revisar Ticket</button>
+            <button class="btn-primary" (click)="generarPDF()">
               {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
             </button>
-            <button *ngIf="esCreador" class="btn-primary centro">Revisar Ticket</button>
+            <button class="btn-primary">Generar reporte del hogar</button>
           </div>
         </div>
 

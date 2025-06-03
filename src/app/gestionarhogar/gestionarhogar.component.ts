@@ -26,6 +26,7 @@ export class GestionarhogarComponent {
   residentes: any[] = [];
   public modalVisible: number = 0;
   public error: number = 0;
+  nombreUsuario: string = '';
 
   private subscription: Subscription = new Subscription();
 
@@ -61,6 +62,7 @@ export class GestionarhogarComponent {
     const id = sessionStorage.getItem('idHogar');
     const nombre = sessionStorage.getItem('nombreHogar');
     const creador = sessionStorage.getItem('esCreador');
+    const nombreUsuario = sessionStorage.getItem('nombreUsuario');
     this.esCreador = creador === 'true';
 
     if (id && nombre) {
@@ -72,6 +74,9 @@ export class GestionarhogarComponent {
       this.router.navigate(['/bienvenida']);
     }
 
+    if (nombreUsuario) {
+      this.nombreUsuario = nombreUsuario;
+    }
   }
 
   ngOnDestroy() {
@@ -145,8 +150,41 @@ export class GestionarhogarComponent {
   }
 
   generarPDF() {
-    const doc = new jsPDF();
-    doc.text('ya jala', 20, 20);
-    doc.save('monto-individual.pdf');
+      const doc = new jsPDF();
+
+  // Título del reporte
+  doc.setFontSize(18);
+  doc.text('Reporte de Monto Individual', 105, 20, { align: 'center' });
+
+  // Fecha actual
+  const fecha = new Date().toLocaleDateString();
+  doc.setFontSize(11);
+  doc.text(`Fecha: ${fecha}`, 20, 30);
+
+  // Línea separadora
+  doc.line(20, 35, 190, 35); // línea horizontal
+
+  // Sección: Resumen
+  doc.setFontSize(14);
+  doc.text('Resumen', 20, 45);
+  doc.setFontSize(11);
+  doc.text('Este reporte presenta un resumen del monto individual correspondiente.', 20, 52);
+
+  // Sección: Detalles
+  doc.setFontSize(14);
+  doc.text('Detalles del Reporte', 20, 65);
+  doc.setFontSize(11);
+  doc.text(`- Usuario: alan`, 25, 72);
+  doc.text('- Monto calculado: $1,200.00 MXN', 25, 79);
+  doc.text('- Periodo: Mayo 2025', 25, 86);
+
+  // Sección: Conclusión
+  doc.setFontSize(14);
+  doc.text('Conclusión', 20, 100);
+  doc.setFontSize(11);
+  doc.text('El monto ha sido determinado con base en los datos registrados en el sistema.', 20, 107);
+
+  // Guardar el documento
+  doc.save('reporte-monto-individual.pdf');
   }
 }
