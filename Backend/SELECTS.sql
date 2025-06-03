@@ -78,3 +78,55 @@ WHERE id = 6;
 SET FOREIGN_KEY_CHECKS = 1; #sirve para desctivar las foreing keys
 
 ALTER TABLE usuarios AUTO_INCREMENT =8; # actualizar el auto incrementable de una tabla
+
+
+
+##################CAMBIOS categoria ##################
+ALTER TABLE `apuntanet_db`.`categoria` 
+DROP FOREIGN KEY `CasaPertenece`;
+ALTER TABLE `apuntanet_db`.`categoria` 
+DROP COLUMN `id_hogar`,
+DROP INDEX `CasaPertenece_idx` ;
+;
+
+##################CREAR hogar_detalles ##################
+CREATE TABLE `apuntanet_db`.`categorias_hogar` (
+  `id` INT NOT NULL,
+  `id_casa` INT NOT NULL,
+  `id_categoria` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `Casa_idx` (`id_casa` ASC) VISIBLE,
+  INDEX `Categoria_idx` (`id_categoria` ASC) VISIBLE,
+  CONSTRAINT `hogar`
+    FOREIGN KEY (`id_casa`)
+    REFERENCES `apuntanet_db`.`hogar` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `Categoria`
+    FOREIGN KEY (`id_categoria`)
+    REFERENCES `apuntanet_db`.`categoria` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+##################CAMBIO TICKET##################
+ALTER TABLE `apuntanet_db`.`ticket` 
+DROP FOREIGN KEY `CategoriaPertenece`;
+ALTER TABLE `apuntanet_db`.`ticket` 
+CHANGE COLUMN `id_categoria` `id_detalleHogar` INT NOT NULL ,
+ADD INDEX `CategoriaPertenece_idx` (`id_detalleHogar` ASC) VISIBLE,
+DROP INDEX `CategoriaPertenece_idx` ;
+;
+ALTER TABLE `apuntanet_db`.`ticket` 
+ADD CONSTRAINT `CategoriaPertenece`
+  FOREIGN KEY (`id_detalleHogar`)
+  REFERENCES `apuntanet_db`.`categorias_hogar` (`id`);
+
+##################renombre a plural##################
+ALTER TABLE `apuntanet_db`.`ticket` 
+DROP FOREIGN KEY `CreadorDelTicket`;
+ALTER TABLE `apuntanet_db`.`ticket` 
+CHANGE COLUMN `id_usuarios` `id_usuario` INT NOT NULL ;
+ALTER TABLE `apuntanet_db`.`ticket` 
+ADD CONSTRAINT `CreadorDelTicket`
+  FOREIGN KEY (`id_usuario`)
+  REFERENCES `apuntanet_db`.`usuarios` (`Id`);
