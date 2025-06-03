@@ -30,7 +30,7 @@ WHERE
     monto_individual.estado = "XPG" #por pagar 
 ORDER BY 
 	monto_individual.fecha_expiracion ASC
-;
+;45
 
 #de esta manera se pueden ver los datos que no han sido encriptados pero si esten en una columna de tipo BLOB 
 SELECT id, usuario ,cast(password AS CHAR) as password,cast(correo AS CHAR) as correo,cast(telefono AS CHAR) as telefono FROM usuarios;
