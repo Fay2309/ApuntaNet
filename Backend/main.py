@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='root',
+                                   password='hola12',
                                    host='localhost',
                                    database='apuntanet_db')
 
@@ -292,55 +292,58 @@ def obtener_residentes(id_hogar):
     
 #esta ruta sirve para crear una categoria en la base de datos
 #se le pasa el id del hogar, el nombre de la categoria, la descripcion y el grado de privilegio. la fecha de creacion se le asigna automaticamente la fecha actual
-@Api.route("/categoria/crear", methods=['POST'])
-def crear_categoria():
+@Api.route("/categorias-hogar/agregar", methods=['POST'])
+def agregar_categoria_a_hogar():
     data = request.get_json()
     id_hogar = data.get('id_hogar')
-    nombre = data.get('nombre_categoria')
-    descripcion = data.get('descripcion_categoria')
-    grado_privilegio = data.get('grado_privilegio')
-    fecha_creacion = data.get('fecha_creacion')
+    id_categoria = data.get('id_categoria')
+
+    if not id_hogar or not id_categoria:
+        return jsonify({"status": "error", "message": "Datos incompletos"}), 400
 
     try:
         cursor = conexion.cursor()
+
         cursor.execute("""
-            INSERT INTO categoria (id_hogar,nombre, descripcion, grado_privilegio, fecha_creacion)
-            VALUES (%s, %s, %s, %s, NOW(), %s)""", 
-            (id_hogar, nombre, descripcion, grado_privilegio, fecha_creacion))
-        conexion.commit()  # Confirma los cambios en la base de datos
-        return jsonify({"status": "Correcto", "message": "Categoria creada exitosamente"}), 201
+            SELECT 1 FROM categorias_hogar
+            WHERE id_hogar = %s AND id_categoria = %s
+        """, (id_hogar, id_categoria))
+
+        if cursor.fetchone():
+            return jsonify({"status": "error", "message": "La categoría ya está asignada a este hogar"}), 400
+
+        cursor.execute("""
+            INSERT INTO categorias_hogar (id_hogar, id_categoria)
+            VALUES (%s, %s)
+        """, (id_hogar, id_categoria))
+        conexion.commit()
+
+        return jsonify({"status": "Correcto", "message": "Categoría asociada correctamente"}), 201
     except mysql.connector.Error as err:
-        return jsonify({"status": "error", "message": f"Error al crear categoria: {err}"}), 500
+        return jsonify({"status": "error", "message": f"Error al asociar categoría: {err}"}), 500
     finally:
         cursor.close()
 
+
 #esta ruta sirve para consultar las categorias de un hogar
 #se le pasa el id del hogar, el cual se utiliza para obtener las categorias de ese hogar
-@Api.route("/categoria/consultar", methods=['POST'])
-def consultar_categoria():
-    data = request.get_json()
-    id_hogar = data.get('id_hogar')
+@Api.route("/categorias/disponible/<int:id_hogar>", methods=['GET'])
+def obtener_categorias_disponibles(id_hogar):
     try:
-        cursor = conexion.cursor()
+        cursor = conexion.cursor(dictionary=True)
         cursor.execute("""
-            SELECT id, nombre, descripcion, grado_privilegio, fecha_creacion
-            FROM categoria
-            WHERE id_hogar = %s""", (id_hogar,))
-
-        resultados = cursor.fetchall()
-        categorias = []
-        for row in resultados:
-            categorias.append({
-                'id': row[0],
-                'nombre': row[1],
-                'descripcion': row[2],
-                'grado_privilegio': row[3],
-                'fecha_creacion': row[4].strftime('%Y-%m-%d %H:%M:%S')
-            })
-        
-        return jsonify({"status": "Correcto", "categorias": categorias}), 200
+            SELECT c.id, c.nombre, c.descripcion
+            FROM categoria c
+            WHERE c.id NOT IN (
+                SELECT ch.id_categoria
+                FROM categorias_hogar ch
+                WHERE ch.id_hogar = %s
+            )
+        """, (id_hogar,))
+        categorias = cursor.fetchall()
+        return jsonify(categorias), 200
     except mysql.connector.Error as err:
-        return jsonify({"status": "error", "message": f"Error al consultar categorias: {err}"}), 500
+        return jsonify({"status": "error", "message": f"Error al obtener categorías: {err}"}), 500
     finally:
         cursor.close()
 
