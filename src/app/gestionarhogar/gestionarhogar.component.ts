@@ -256,7 +256,7 @@ export class GestionarhogarComponent {
       body: [
         ['1', '200', 'luz', 'uwu'],
         ['2', '50', 'agua', '7w7'],
-        ['2', '70', 'gas', '7w7'],
+        ['3', '70', 'gas', '7w7'],
       ],
       styles: {
         fillColor: [255, 255, 255],
