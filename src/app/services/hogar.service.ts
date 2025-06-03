@@ -14,6 +14,8 @@ export class HogarService {
   private apiconsultarhogar = 'http://localhost:5000/consultarHogar';
   private apisalirHogar = 'http://localhost:5000/salirHogar';
   private apiresidentes = 'http://localhost:5000';
+  private apicategoriashogar = 'http://localhost:5000/categorias-hogar/agregar';
+  private apicategoriasdisponibles = 'http://localhost:5000/categorias/disponible/';
 
   constructor(private http: HttpClient) {}
 
@@ -34,12 +36,27 @@ salirseDelHogar(token: string) {
   });
 }
 
-getResidentes(idHogar: number) {
+//
+// // METODOS DE GESTIONAR HOGAR
+//
+agregarCategoriaAHogar(datos: any): Observable<any> {
+  return this.http.post(this.apicategoriashogar, datos);
+}
+
+obtenerCategoriasDisponibles(idHogar: number): Observable<any> {
+  return this.http.get(`${this.apicategoriasdisponibles}${idHogar}`);
+}
+
+getResidentes(idHogar: number) {  
   return this.http.get<{ status: string, residentes: any[] }>(
     `${this.apiresidentes}/hogar/residentes/${idHogar}`
   );
 }
 
+
+//
+// // METODOS PARA ENVIAR DATOS DESDE BIENVENIDA A GESTIONAR HOGAR
+//
   private nombreHogarSubject = new BehaviorSubject<string>('');
   nombreHogar$ = this.nombreHogarSubject.asObservable();
 

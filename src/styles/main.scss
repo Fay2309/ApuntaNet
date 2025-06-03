@@ -228,7 +228,9 @@ body {
   font-size: 16px;
 }
 
-
+textarea {
+  resize: none;
+}
 
 // // Estilos para alertas/notificaciones
 // .alert {

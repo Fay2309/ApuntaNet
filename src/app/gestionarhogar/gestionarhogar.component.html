@@ -30,15 +30,15 @@
         <div *ngIf="seccionActiva === 'gastos'">
           <h3>Control de Gastos</h3>
           <div class="grid-gastos-tres-columnas">
-            <button type="button" class="btn-primary" (click)="mostrarModalCategoria(); $event.stopPropagation()">Crear categoria</button>
+            <button type="button" class="btn-primary" (click)="mostrarModalCategoria(); $event.stopPropagation()">Agregar categoria</button>
             <button class="btn-primary">Generar ticket</button>
             <button class="btn-primary" (click)="generarPDF()">
               Generar reporte individual
             </button>
-            <button *ngIf="esCreador" class="btn-primary">Revisar Ticket</button>
             <button class="btn-primary">
               {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
             </button>
+            <button *ngIf="esCreador" class="btn-primary">Revisar Ticket</button>
             <button class="btn-primary" (click)="generarPDFgrupal()">Generar reporte del hogar</button>
           </div>
         </div>
@@ -63,42 +63,45 @@
 <!--  -->
 <!-- SECCCIÓN DE CREAR CATEGORIA -->
  <!--  -->
-  <div class="modal-fondo" *ngIf="modalVisible==1 && error==1">
-    <div class="modal-contenido" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Crear nueva categoria</h3>
-      </div>
-      <div class="modal-body">
-        <form [formGroup]="crearCategoriaForm">
-          <div class="form-grupo">
-            <label for="nombreCategoria">Nombre categoria *</label>
-            <input 
-              type="text" 
-              id="nombreCategoria"
-              formControlName="nombreCategoria"
-              [class.error]="(crearCategoriaForm.get('nombreCategoria')?.touched || submitted) && crearCategoriaForm.get('nombreCategoria')?.invalid"
-            >
-            <div class="mensaje-error" *ngIf="getMensajeError('nombreCategoria')">
-              {{ getMensajeError('nombreCategoria') }}
-            </div>
+<div class="modal-fondo" *ngIf="modalVisible==1 && error==1">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Agregar categoría al hogar</h3>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="crearCategoriaForm" (ngSubmit)="crearCategoria()">
+        <div class="form-grupo">
+          <label for="categoriaSelect">Categoría *</label>
+          <select 
+            id="categoriaSeleccionada"
+            formControlName="categoriaSeleccionada"
+            (change)="actualizarDescripcionCategoria()"
+          >
+            <option value="" disabled selected>Selecciona una categoria</option>
+            <option *ngFor="let cat of categoriasDisponibles" [value]="cat.id">
+              {{ cat.nombre }}
+            </option>
+          </select>
+          <div class="mensaje-error" *ngIf="getMensajeError('categoriaSeleccionada')">
+            {{ getMensajeError('categoriaSeleccionada') }}
           </div>
-          <div class="form-grupo">
-            <label for="descripcion">Descripción</label>
-            <textarea 
-              id="descripcion" 
-              formControlName="descripcion"
-              rows="4"
-              [class.error]="(crearCategoriaForm.get('descripcion')?.touched || submitted) && crearCategoriaForm.get('descripcion')?.invalid"
-            ></textarea>
-            <div class="mensaje-error" *ngIf="getMensajeError('descripcion')">
-              {{ getMensajeError('descripcion') }}
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn-primary">Crear categoria</button>
-          </div>
-        </form>
-      </div>
+        </div>
+
+        <div class="form-grupo">
+          <label for="descripcion">Descripción</label>
+          <textarea 
+            id="descripcion" 
+            [value]="descripcionCategoria"
+            disabled
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Agregar categoría</button>
+        </div>
+      </form>
     </div>
   </div>
+</div>

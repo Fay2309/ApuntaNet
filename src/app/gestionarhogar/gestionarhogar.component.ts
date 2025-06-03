@@ -28,6 +28,8 @@ export class GestionarhogarComponent {
   public modalVisible: number = 0;
   public error: number = 0;
   nombreUsuario: string = '';
+  categoriasDisponibles: any[] = []; 
+  descripcionCategoria: string = '';
 
   private subscription: Subscription = new Subscription();
 
@@ -38,8 +40,7 @@ export class GestionarhogarComponent {
     private elementRef: ElementRef, 
     ) {
     this.crearCategoriaForm = this.fb.group({
-      nombreCategoria: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]],
-      descripcion: ['', [Validators.maxLength(200)]]
+      categoriaSeleccionada: ['', Validators.required]
     });
   }
 
@@ -66,18 +67,19 @@ export class GestionarhogarComponent {
     const nombreUsuario = sessionStorage.getItem('nombreUsuario');
     this.esCreador = creador === 'true';
 
-    if (id && nombre) {
-      this.idHogar = +id;
-      this.nombreHogar = nombre;
-      this.seccionActiva = 'gastos'; 
-    } else {
-      console.warn("No se encontró información del hogar.");
-      this.router.navigate(['/bienvenida']);
-    }
+  if (id && nombre) {
+    this.idHogar = +id;
+    this.nombreHogar = nombre;
+    this.seccionActiva = 'gastos';
+    this.cargarCategoriasDisponibles();
+  } else {
+    console.warn("No se encontró información del hogar.");
+    this.router.navigate(['/bienvenida']);
+  }
 
-    if (nombreUsuario) {
-      this.nombreUsuario = nombreUsuario;
-    }
+  if (nombreUsuario) {
+    this.nombreUsuario = nombreUsuario;
+  }
   }
 
   ngOnDestroy() {
@@ -99,6 +101,62 @@ export class GestionarhogarComponent {
     this.cdr.detectChanges();
   }
 
+  //
+  // // FUNCIONES PARA GESTIONAR HOGAR
+  // 
+  crearCategoria(): void {
+  this.submitted = true;
+
+  if (this.crearCategoriaForm.valid) {
+    const datos = {
+      id_hogar: this.idHogar, 
+      id_categoria: this.crearCategoriaForm.value.categoriaSeleccionada
+    };
+
+    this.hogarService.agregarCategoriaAHogar(datos).subscribe({
+      next: (respuesta: any) => {
+        console.log('Categoría agregada:', respuesta);
+        this.cerrarModal();
+        window.location.reload();
+      },
+      error: (error: any) => {
+        if (error.status === 400 && error.error.message) {
+          alert(error.error.message);
+        } else {
+          console.error('Error al agregar categoría:', error);
+        }
+      }
+    });
+  } else {
+    this.crearCategoriaForm.markAllAsTouched();
+  }
+}
+
+actualizarDescripcionCategoria(): void {
+  const idSeleccionado = this.crearCategoriaForm.value.categoriaSeleccionada;
+  const categoria = this.categoriasDisponibles.find(c => c.id == idSeleccionado);
+  this.descripcionCategoria = categoria?.descripcion || '';
+}
+
+  cargarCategoriasDisponibles(): void {
+    if (this.idHogar !== null) {
+      this.hogarService.obtenerCategoriasDisponibles(this.idHogar).subscribe({
+        next: (categorias) => {
+          this.categoriasDisponibles = categorias;
+        },
+        error: (err) => {
+          console.error('Error al obtener categorías disponibles:', err);
+        }
+      });
+    } else {
+      console.warn('ID del hogar no definido para cargar categorías disponibles.');
+    }
+  }
+
+
+//
+// // FUNCIONES PARA GESTIONARR RESIDENTES
+//
   mostrarResidentes() {
     this.seccionActiva = 'residentes';
     if (!this.residentes || this.residentes.length === 0) {
@@ -150,6 +208,9 @@ export class GestionarhogarComponent {
     }
   }
 
+  //
+  // // FUNCION PARA GENERAR PDF
+  //
   generarPDF() {
     const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
 
@@ -210,7 +271,6 @@ export class GestionarhogarComponent {
       margin: { left: 60, right: 60 }
     });
 
-    // --- Categoría: Servicios ---
     y = (doc as any).lastAutoTable.finalY + 30;
     doc.setTextColor(100, 180, 255);
     doc.setFontSize(14);
