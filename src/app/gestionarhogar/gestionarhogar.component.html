@@ -73,8 +73,8 @@
         <div class="form-grupo">
           <label for="categoriaSelect">Categoría *</label>
           <select 
-            id="categoriaSeleccionada"
-            formControlName="categoriaSeleccionada"
+            id="categoriaNueva"
+            formControlName="categoriaNueva"
             (change)="actualizarDescripcionCategoria()"
           >
             <option value="" disabled selected>Selecciona una categoria</option>
@@ -82,8 +82,8 @@
               {{ cat.nombre }}
             </option>
           </select>
-          <div class="mensaje-error" *ngIf="getMensajeError('categoriaSeleccionada')">
-            {{ getMensajeError('categoriaSeleccionada') }}
+          <div class="mensaje-error" *ngIf="getMensajeError('categoriaNueva')">
+            {{ getMensajeError('categoriaNueva') }}
           </div>
         </div>
 
@@ -188,7 +188,7 @@
           </div>
         </div>
 
-        <!-- Tercera fila: Descripción (ancho completo) -->
+        <!-- DESCRIPCION -->
         <div class="form-grupo">
           <label for="descripcion">Descripción</label>
           <textarea 

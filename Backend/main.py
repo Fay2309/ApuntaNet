@@ -366,8 +366,6 @@ def obtener_categorias_seleccionadas(id_hogar):
     finally:
         cursor.close()
 
-
-
 #retorna el monto total y el nombre de la categoria, tomando en cuenta el mes y el año actual
 #se le pasa id del usuario y el id del hogar
 @Api.route("/DesgloseMensual", methods=['GET'])

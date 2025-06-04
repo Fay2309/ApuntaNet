@@ -45,11 +45,12 @@ export class GestionarhogarComponent {
     const fechaExpiracion = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 30);
 
     this.crearCategoriaForm = this.fb.group({
-      categoriaSeleccionada: ['', Validators.required]
+      categoriaNueva: ['', Validators.required]
     });
     this.crearTicketForm = this.fb.group({
       nombreTicket: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       descripcion: ['', [Validators.maxLength(200)]],
+      categoriaSeleccionada: [null, Validators.required],
       montoTicket: ['', [Validators.required, Validators.min(0.01)]],
       fechaCreacion: [{ 
         value: fechaActual.toISOString().split('T')[0], 
@@ -62,7 +63,7 @@ export class GestionarhogarComponent {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.subscription = this.hogarService.nombreHogar$.subscribe(
       nombre => this.nombreHogar = nombre 
     );
@@ -89,8 +90,13 @@ export class GestionarhogarComponent {
     this.idHogar = +id;
     this.nombreHogar = nombre;
     this.seccionActiva = 'gastos';
-    this.cargarCategoriasDisponibles();
-    this.cargarCategoriasSeleccionadas();
+    
+    try {
+      await this.cargarCategoriasDisponibles();
+      await this.cargarCategoriasSeleccionadas();
+    } catch (error) {
+      console.error('Error al cargar categorías:', error);
+    }
   } else {
     console.warn("No se encontró información del hogar.");
     this.router.navigate(['/bienvenida']);
@@ -137,7 +143,7 @@ export class GestionarhogarComponent {
   if (this.crearCategoriaForm.valid) {
     const datos = {
       id_hogar: this.idHogar, 
-      id_categoria: this.crearCategoriaForm.value.categoriaSeleccionada
+      id_categoria: this.crearCategoriaForm.value.categoriaNueva
     };
 
     this.hogarService.agregarCategoriaAHogar(datos).subscribe({
@@ -160,39 +166,51 @@ export class GestionarhogarComponent {
 }
 
 actualizarDescripcionCategoria(): void {
-  const idSeleccionado = this.crearCategoriaForm.value.categoriaSeleccionada;
+  const idSeleccionado = this.crearCategoriaForm.value.categoriaNueva;
   const categoria = this.categoriasDisponibles.find(c => c.id == idSeleccionado);
   this.descripcionCategoria = categoria?.descripcion || '';
 }
 
-  cargarCategoriasDisponibles(): void {
+cargarCategoriasDisponibles(): Promise<void> {
+  return new Promise((resolve, reject) => {
     if (this.idHogar !== null) {
       this.hogarService.obtenerCategoriasDisponibles(this.idHogar).subscribe({
         next: (categorias) => {
           this.categoriasDisponibles = categorias;
+          resolve();
         },
         error: (err) => {
           console.error('Error al obtener categorías disponibles:', err);
+          reject(err);
         }
       });
     } else {
       console.warn('ID del hogar no definido para cargar categorías disponibles.');
+      resolve();
     }
-  }
+  });
+}
 
-  cargarCategoriasSeleccionadas(): void {
-    if (!this.idHogar) return;
+cargarCategoriasSeleccionadas(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!this.idHogar) {
+      resolve();
+      return;
+    }
 
     this.hogarService.obtenerCategoriasSeleccionadas(this.idHogar).subscribe({
       next: (categorias) => {
         this.categoriasSeleccionadas = categorias;
         console.log('Categorías ya agregadas al hogar:', this.categoriasSeleccionadas);
+        resolve();
       },
       error: (error) => {
         console.error('Error al cargar categorías seleccionadas:', error);
+        reject(error);
       }
     });
-  }
+  });
+}
 
 //
 // // FUNCIONES PARA GESTIONARR RESIDENTES
