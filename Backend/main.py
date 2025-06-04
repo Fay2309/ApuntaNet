@@ -347,6 +347,26 @@ def obtener_categorias_disponibles(id_hogar):
     finally:
         cursor.close()
 
+#esta ruta sirve para consultar las categorias de un hogar
+#se le pasa el id del hogar, el cual se utiliza para obtener las categorias de ese hogar
+@Api.route("/categorias/seleccionadas/<int:id_hogar>", methods=["GET"])
+def obtener_categorias_seleccionadas(id_hogar):
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT c.id AS id, c.nombre, c.descripcion
+            FROM categoria c
+            JOIN categorias_hogar ch ON c.id = ch.id_categoria
+            WHERE ch.id_hogar = %s
+        """, (id_hogar,))
+        categorias = cursor.fetchall()
+        return jsonify(categorias), 200
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+    finally:
+        cursor.close()
+
+
 
 #retorna el monto total y el nombre de la categoria, tomando en cuenta el mes y el año actual
 #se le pasa id del usuario y el id del hogar

@@ -47,6 +47,10 @@ obtenerCategoriasDisponibles(idHogar: number): Observable<any> {
   return this.http.get(`${this.apicategoriasdisponibles}${idHogar}`);
 }
 
+obtenerCategoriasSeleccionadas(idHogar: number): Observable<any[]> {
+  return this.http.get<any[]>(`http://localhost:5000/categorias/seleccionadas/${idHogar}`);
+}
+
 getResidentes(idHogar: number) {  
   return this.http.get<{ status: string, residentes: any[] }>(
     `${this.apiresidentes}/hogar/residentes/${idHogar}`

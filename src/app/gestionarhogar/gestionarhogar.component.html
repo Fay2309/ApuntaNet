@@ -31,7 +31,7 @@
           <h3>Control de Gastos</h3>
           <div class="grid-gastos-tres-columnas">
             <button type="button" class="btn-primary" (click)="mostrarModalCategoria(); $event.stopPropagation()">Agregar categoria</button>
-            <button class="btn-primary">Generar ticket</button>
+            <button class="btn-primary" (click)="mostrarModalTicket(); $event.stopPropagation()">Crear ticket</button>
             <button class="btn-primary" (click)="generarPDF()">
               Generar reporte individual
             </button>
@@ -100,6 +100,108 @@
         <div class="modal-footer">
           <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
           <button type="submit" class="btn-primary">Agregar categoría</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!--  -->
+<!-- SECCCIÓN DE CREAR TICKET -->
+ <!--  -->
+<div class="modal-fondo" *ngIf="modalVisible===2 && error===2">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Agregar ticket al hogar</h3>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="crearTicketForm">
+        <!-- NOMBRE Y MONTO -->
+        <div class="form-fila">
+          <div class="form-grupo form-grupo-medio">
+            <label for="nombreTicket">Nombre del Ticket *</label>
+            <input 
+              type="text" 
+              id="nombreTicket" 
+              formControlName="nombreTicket"
+              [class.error]="(crearTicketForm.get('nombreTicket')?.touched || submitted) && crearTicketForm.get('nombreTicket')?.invalid"
+            >
+            <div class="mensaje-error" *ngIf="getMensajeError('nombreTicket')">
+              {{ getMensajeError('nombreTicket') }}
+            </div>
+          </div>
+
+          <div class="form-grupo form-grupo-medio">
+            <label for="montoTicket">Monto del Ticket *</label>
+            <div class="input-moneda">
+              <span class="simbolo-moneda">$</span>
+              <input 
+                type="number" 
+                id="montoTicket" 
+                formControlName="montoTicket"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                [class.error]="(crearTicketForm.get('montoTicket')?.touched || submitted) && crearTicketForm.get('montoTicket')?.invalid"
+              >
+            </div>
+            <div class="mensaje-error" *ngIf="getMensajeError('montoTicket')">
+              {{ getMensajeError('montoTicket') }}
+            </div>
+          </div>
+
+          <div class="form-grupo form-grupo-medio">
+            <label for="categoriaTicket">Categoria *</label>
+          <select 
+            id="categoriaSeleccionada"
+            formControlName="categoriaSeleccionada"
+          >
+            <option *ngFor="let catS of categoriasSeleccionadas" [value]="catS.id">
+              {{ catS.nombre }}
+            </option>
+          </select>
+          </div>
+        </div>
+
+        <!-- FECHAS -->
+        <div class="form-fila">
+          <div class="form-grupo form-grupo-medio">
+            <label for="fechaCreacion">Fecha de Creación</label>
+            <input 
+              type="date" 
+              id="fechaCreacion" 
+              formControlName="fechaCreacion"
+              readonly
+              class="campo-readonly"
+            >
+          </div>
+
+          <div class="form-grupo form-grupo-medio">
+            <label for="fechaExpiracion">Fecha de Expiración</label>
+            <input 
+              type="date" 
+              id="fechaExpiracion" 
+              formControlName="fechaExpiracion"
+              readonly
+              class="campo-readonly"
+            >
+          </div>
+        </div>
+
+        <!-- Tercera fila: Descripción (ancho completo) -->
+        <div class="form-grupo">
+          <label for="descripcion">Descripción</label>
+          <textarea 
+            id="descripcion"
+            formControlName="descripcion"
+            rows="4"
+            placeholder="Ingresa una descripción del ticket..."
+          ></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Mandar ticket</button>
         </div>
       </form>
     </div>

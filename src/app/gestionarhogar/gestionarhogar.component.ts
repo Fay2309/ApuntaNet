@@ -18,6 +18,7 @@ import autoTable from 'jspdf-autotable';
 })
 export class GestionarhogarComponent {
   public crearCategoriaForm: FormGroup;
+  public crearTicketForm: FormGroup;
   public submitted: boolean = false;
   public menuVisible: boolean = false;
   seccionActiva: string = 'gastos';
@@ -29,6 +30,7 @@ export class GestionarhogarComponent {
   public error: number = 0;
   nombreUsuario: string = '';
   categoriasDisponibles: any[] = []; 
+  categoriasSeleccionadas: any[] = [];
   descripcionCategoria: string = '';
 
   private subscription: Subscription = new Subscription();
@@ -39,8 +41,24 @@ export class GestionarhogarComponent {
     private cdr: ChangeDetectorRef,
     private elementRef: ElementRef, 
     ) {
+    const fechaActual = new Date();
+    const fechaExpiracion = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 30);
+
     this.crearCategoriaForm = this.fb.group({
       categoriaSeleccionada: ['', Validators.required]
+    });
+    this.crearTicketForm = this.fb.group({
+      nombreTicket: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      descripcion: ['', [Validators.maxLength(200)]],
+      montoTicket: ['', [Validators.required, Validators.min(0.01)]],
+      fechaCreacion: [{ 
+        value: fechaActual.toISOString().split('T')[0], 
+        disabled: true 
+      }],
+      fechaExpiracion: [{ 
+        value: fechaExpiracion.toISOString().split('T')[0], 
+        disabled: true 
+      }]
     });
   }
 
@@ -72,6 +90,7 @@ export class GestionarhogarComponent {
     this.nombreHogar = nombre;
     this.seccionActiva = 'gastos';
     this.cargarCategoriasDisponibles();
+    this.cargarCategoriasSeleccionadas();
   } else {
     console.warn("No se encontró información del hogar.");
     this.router.navigate(['/bienvenida']);
@@ -91,6 +110,14 @@ export class GestionarhogarComponent {
   mostrarModalCategoria(): void {
     this.modalVisible = 1;
     this.error = 1;
+    this.submitted = false;
+    this.crearCategoriaForm.reset();
+    this.cdr.detectChanges();
+  }
+
+  mostrarModalTicket(): void {
+    this.modalVisible = 2;
+    this.error = 2;
     this.submitted = false;
     this.crearCategoriaForm.reset();
     this.cdr.detectChanges();
@@ -153,6 +180,19 @@ actualizarDescripcionCategoria(): void {
     }
   }
 
+  cargarCategoriasSeleccionadas(): void {
+    if (!this.idHogar) return;
+
+    this.hogarService.obtenerCategoriasSeleccionadas(this.idHogar).subscribe({
+      next: (categorias) => {
+        this.categoriasSeleccionadas = categorias;
+        console.log('Categorías ya agregadas al hogar:', this.categoriasSeleccionadas);
+      },
+      error: (error) => {
+        console.error('Error al cargar categorías seleccionadas:', error);
+      }
+    });
+  }
 
 //
 // // FUNCIONES PARA GESTIONARR RESIDENTES
@@ -173,14 +213,23 @@ actualizarDescripcionCategoria(): void {
   }
 
 
+//
+// // CONTROL DE ERRORES
+//
     getMensajeError(controlName: string): string {
     if (this.error === 1) {
       const control = this.crearCategoriaForm.get(controlName);
-      if (control?.errors && (control.touched || this.submitted)) {
-      if (control.errors['required']) return 'Este campo es obligatorio';
-      if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
-      if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+        if (control?.errors && (control.touched || this.submitted)) {
+        if (control.errors['required']) return 'Este campo es obligatorio';
       } 
+    } else if (this.error === 2){
+      const control = this.crearTicketForm.get(controlName);
+      if (control?.errors && (control.touched || this.submitted)) {
+        if (control.errors['required']) return 'Este campo es obligatorio';
+        if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
+        if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+        if (control.errors['min']) { return `El monto debe ser mayor a 0`; }
+      }
     }
     return '';
   }
