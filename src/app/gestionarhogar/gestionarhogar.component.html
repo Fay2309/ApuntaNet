@@ -75,6 +75,7 @@
           <select 
             id="categoriaNueva"
             formControlName="categoriaNueva"
+            [class.error]="(crearCategoriaForm.get('categoriaNueva')?.touched || submitted) && crearCategoriaForm.get('categoriaNueva')?.invalid"
             (change)="actualizarDescripcionCategoria()"
           >
             <option value="" disabled selected>Selecciona una categoria</option>
@@ -115,7 +116,7 @@
       <h3>Agregar ticket al hogar</h3>
     </div>
     <div class="modal-body">
-      <form [formGroup]="crearTicketForm">
+      <form [formGroup]="crearTicketForm" (ngSubmit)="crearTicket()">
         <!-- NOMBRE Y MONTO -->
         <div class="form-fila">
           <div class="form-grupo form-grupo-medio">
@@ -155,11 +156,16 @@
           <select 
             id="categoriaSeleccionada"
             formControlName="categoriaSeleccionada"
+            [class.error]="(crearTicketForm.get('categoriaSeleccionada')?.touched || submitted) && crearTicketForm.get('categoriaSeleccionada')?.invalid"  
           >
+            <option value="" disabled>Selecciona una categoría</option>
             <option *ngFor="let catS of categoriasSeleccionadas" [value]="catS.id">
               {{ catS.nombre }}
             </option>
           </select>
+            <div class="mensaje-error" *ngIf="getMensajeError('categoriaSeleccionada')">
+              {{ getMensajeError('categoriaSeleccionada') }}
+            </div>
           </div>
         </div>
 

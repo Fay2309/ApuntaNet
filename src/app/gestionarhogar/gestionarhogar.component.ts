@@ -24,6 +24,7 @@ export class GestionarhogarComponent {
   seccionActiva: string = 'gastos';
   nombreHogar: string = '';
   idHogar: number | null = null;
+  IdUsuario: number | null = null;
   esCreador: boolean = false;
   residentes: any[] = [];
   public modalVisible: number = 0;
@@ -84,6 +85,7 @@ export class GestionarhogarComponent {
     const nombre = sessionStorage.getItem('nombreHogar');
     const creador = sessionStorage.getItem('esCreador');
     const nombreUsuario = sessionStorage.getItem('nombreUsuario');
+    const id_usuario = sessionStorage.getItem('IdUsuario');
     this.esCreador = creador === 'true';
 
   if (id && nombre) {
@@ -105,8 +107,11 @@ export class GestionarhogarComponent {
   if (nombreUsuario) {
     this.nombreUsuario = nombreUsuario;
   }
-  }
 
+  if (id_usuario) {
+    this.IdUsuario = +id_usuario;
+  }
+}
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
@@ -130,6 +135,7 @@ export class GestionarhogarComponent {
   }
 
   cerrarModal(): void {
+    this.submitted = false;
     this.modalVisible = 0;
     this.cdr.detectChanges();
   }
@@ -213,7 +219,59 @@ cargarCategoriasSeleccionadas(): Promise<void> {
 }
 
 //
-// // FUNCIONES PARA GESTIONARR RESIDENTES
+// // FUNCIONES PARA GESTIONAR TICKETS
+//
+
+async crearTicket(): Promise<void> {
+  this.submitted = true;
+
+  if (this.crearTicketForm.invalid || !this.IdUsuario || !this.idHogar) {
+    console.warn('Formulario inválido o faltan datos de usuario/hogar');
+    return;
+  }
+
+  const formValues = this.crearTicketForm.getRawValue();
+
+  const ticket = {
+    id_categoriahogar: formValues.categoriaSeleccionada,
+    nombre: formValues.nombreTicket,
+    descripcion: formValues.descripcion,
+    id_usuario: this.IdUsuario,
+    monto_total: parseFloat(formValues.montoTicket),
+    fecha_creacion: formValues.fechaCreacion,
+    fecha_expiracion: formValues.fechaExpiracion,
+    estado: 'P'  
+  };
+
+  try {
+    await this.hogarService.crearTicket(ticket).toPromise();
+    console.log('Ticket creado exitosamente');
+    this.resetearCampos();
+    this.cerrarModal();
+  } catch (error) {
+    console.error('Error al crear el ticket:', error);
+  }
+}
+
+resetearCampos(): void {
+  this.crearTicketForm.patchValue({
+    nombreTicket: '',
+    descripcion: '',
+    montoTicket: '',
+    categoriaSeleccionada: ''
+  });
+
+  this.crearTicketForm.get('nombreTicket')?.markAsUntouched();
+  this.crearTicketForm.get('descripcion')?.markAsUntouched();
+  this.crearTicketForm.get('montoTicket')?.markAsUntouched();
+  this.crearTicketForm.get('categoriaSeleccionada')?.markAsUntouched();
+
+  this.submitted = false;
+}
+
+
+//
+// // FUNCIONES PARA GESTIONAR RESIDENTES
 //
   mostrarResidentes() {
     this.seccionActiva = 'residentes';

@@ -76,6 +76,7 @@ async ngOnInit(): Promise<void> {
       this.codigoHogar = hogar.codigo;
       this.enviarNombreHogar(this.nombreHogar);
       this.enviarIdHogar(hogar.id); 
+      this.enviarIdUsuario(this.usuarioId);
 
       sessionStorage.setItem('idHogar', String(hogar.id));
       sessionStorage.setItem('nombreHogar', this.nombreHogar);
@@ -141,6 +142,10 @@ private async cargarDatosIniciales(): Promise<void> {
 
   enviarIdHogar(id: number) {
     this.hogarService.setIdHogar(id);
+  }
+
+  enviarIdUsuario(id_usuario: number) {
+    this.hogarService.setIdUsuario(id_usuario);
   }
 
 // -------------------------------------------------------------------------------------------------------

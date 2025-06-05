@@ -57,6 +57,11 @@ getResidentes(idHogar: number) {
   );
 }
 
+crearTicket(ticket: any): Observable<any> {
+  return this.http.post(`${this.apiresidentes}/tickets`, ticket);
+}
+
+
 
 //
 // // METODOS PARA ENVIAR DATOS DESDE BIENVENIDA A GESTIONAR HOGAR
@@ -69,6 +74,9 @@ getResidentes(idHogar: number) {
 
   private esCreadorSubject = new BehaviorSubject<boolean>(false);
   esCreador$ = this.esCreadorSubject.asObservable();
+
+  private idUsuarioSubject = new BehaviorSubject<number | null>(null);
+  idUsuario$ = this.idUsuarioSubject.asObservable();
 
   setNombreHogar(nombre: string) {
     this.nombreHogarSubject.next(nombre);
@@ -92,6 +100,14 @@ getResidentes(idHogar: number) {
 
   getEsCreador(): boolean {
     return this.esCreadorSubject.value;
+  }
+
+  setIdUsuario(id_usuario: number) {
+    this.idUsuarioSubject.next(id_usuario);
+  }
+
+  getIdUsuario(): number | null {
+    return this.idUsuarioSubject.value;
   }
 }
 

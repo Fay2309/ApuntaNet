@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `apuntanet_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `apuntanet_db`;
 -- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
 --
 -- Host: localhost    Database: apuntanet_db
@@ -18,36 +16,6 @@ USE `apuntanet_db`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `administradores`
---
-
-DROP TABLE IF EXISTS `administradores`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `administradores` (
-  `id` int NOT NULL,
-  `id_usuario` int NOT NULL,
-  `id_hogar` int NOT NULL,
-  `fecha_auditora` timestamp NOT NULL,
-  `grado_privilegio` int NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `usuario_idx` (`id_usuario`),
-  KEY `hogar_administrado_idx` (`id_hogar`),
-  CONSTRAINT `hogar_administrado` FOREIGN KEY (`id_hogar`) REFERENCES `hogar` (`id`),
-  CONSTRAINT `usuario_administrador` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='sirve para almacenar quienes tienen permiso de modificar informacion sensible de las categorias de un hogar al que pertenece';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `administradores`
---
-
-LOCK TABLES `administradores` WRITE;
-/*!40000 ALTER TABLE `administradores` DISABLE KEYS */;
-/*!40000 ALTER TABLE `administradores` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `casas_usuarios`
 --
 
@@ -64,7 +32,7 @@ CREATE TABLE `casas_usuarios` (
   KEY `id_hogar_idx` (`id_hogar`),
   CONSTRAINT `id_hogar` FOREIGN KEY (`id_hogar`) REFERENCES `hogar` (`id`),
   CONSTRAINT `id_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='la tabla de todos los usuarios a los que pertenece un hogar';
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='la tabla de todos los usuarios a los que pertenece un hogar';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,6 +41,7 @@ CREATE TABLE `casas_usuarios` (
 
 LOCK TABLES `casas_usuarios` WRITE;
 /*!40000 ALTER TABLE `casas_usuarios` DISABLE KEYS */;
+INSERT INTO `casas_usuarios` VALUES (11,4,9,'2025-05-31 01:54:36'),(12,5,9,'2025-06-01 00:32:14'),(13,6,9,'2025-06-03 05:56:29');
 /*!40000 ALTER TABLE `casas_usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -84,16 +53,12 @@ DROP TABLE IF EXISTS `categoria`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `categoria` (
-  `id` int NOT NULL,
-  `id_hogar` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(45) NOT NULL,
-  `descripcion` varchar(45) NOT NULL,
-  `grado_privilegio` int NOT NULL,
+  `descripcion` varchar(100) NOT NULL,
   `fecha_creacion` timestamp NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `CasaPertenece_idx` (`id_hogar`),
-  CONSTRAINT `CasaPertenece` FOREIGN KEY (`id_hogar`) REFERENCES `hogar` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -102,7 +67,37 @@ CREATE TABLE `categoria` (
 
 LOCK TABLES `categoria` WRITE;
 /*!40000 ALTER TABLE `categoria` DISABLE KEYS */;
+INSERT INTO `categoria` VALUES (1,'Servicios: basicos','Servicios como agua, luz y gas entran en este apartado','2025-06-03 07:00:00'),(2,'Servicios: otros','Servicios prescindibles, streaming, m√∫sica, videojuegos entr√°n en este apartado','2025-06-03 07:00:00'),(3,'Abarrotes','Todo lo relacionado con la compra en una abarroteria entra en este apartado','2025-06-03 07:00:00'),(4,'Medicamento','Todo lo relacionado con medicamento va relacionado con este apartado','2025-06-03 07:00:00'),(6,'Otros','Todo gasto que no entre en las otras categorias va en este apartado','2025-06-04 07:00:00'),(7,'Renta','Gasto relacionado con la renta del hogar va en este apartado','2025-06-04 07:00:00');
 /*!40000 ALTER TABLE `categoria` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `categorias_hogar`
+--
+
+DROP TABLE IF EXISTS `categorias_hogar`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `categorias_hogar` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_hogar` int NOT NULL,
+  `id_categoria` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Casa_idx` (`id_hogar`),
+  KEY `Categoria_idx` (`id_categoria`),
+  CONSTRAINT `Categoria` FOREIGN KEY (`id_categoria`) REFERENCES `categoria` (`id`),
+  CONSTRAINT `hogar` FOREIGN KEY (`id_hogar`) REFERENCES `hogar` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `categorias_hogar`
+--
+
+LOCK TABLES `categorias_hogar` WRITE;
+/*!40000 ALTER TABLE `categorias_hogar` DISABLE KEYS */;
+INSERT INTO `categorias_hogar` VALUES (4,9,1),(5,9,7);
+/*!40000 ALTER TABLE `categorias_hogar` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -122,7 +117,7 @@ CREATE TABLE `hogar` (
   PRIMARY KEY (`id`),
   KEY `creador_idx` (`id_usuario`),
   CONSTRAINT `creador` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -131,6 +126,7 @@ CREATE TABLE `hogar` (
 
 LOCK TABLES `hogar` WRITE;
 /*!40000 ALTER TABLE `hogar` DISABLE KEYS */;
+INSERT INTO `hogar` VALUES (9,'Casa Culichi','hola',3,'2025-05-28 06:38:13','gkv2dx');
 /*!40000 ALTER TABLE `hogar` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -178,18 +174,21 @@ DROP TABLE IF EXISTS `ticket`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ticket` (
-  `id` int NOT NULL,
-  `id_categoria` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_categoriahogar` int NOT NULL,
   `nombre` varchar(45) NOT NULL,
   `descripcion` varchar(45) NOT NULL,
+  `id_usuario` int NOT NULL,
   `monto_total` decimal(5,2) NOT NULL,
   `fecha_creacion` timestamp NOT NULL,
-  `fecha_expiracion` datetime NOT NULL,
-  `estado` tinyint NOT NULL,
+  `fecha_expiracion` date NOT NULL,
+  `estado` varchar(1) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `CategoriaPertenece_idx` (`id_categoria`),
-  CONSTRAINT `CategoriaPertenece` FOREIGN KEY (`id_categoria`) REFERENCES `categoria` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `CreadorDelTicket_idx` (`id_usuario`),
+  KEY `CategoriaPertenece_idx` (`id_categoriahogar`),
+  CONSTRAINT `CategoriaPertenece` FOREIGN KEY (`id_categoriahogar`) REFERENCES `categorias_hogar` (`id`),
+  CONSTRAINT `CreadorDelTicket` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -198,6 +197,7 @@ CREATE TABLE `ticket` (
 
 LOCK TABLES `ticket` WRITE;
 /*!40000 ALTER TABLE `ticket` DISABLE KEYS */;
+INSERT INTO `ticket` VALUES (11,4,'Pago Luz','Pago de mi parte de la luz',3,150.00,'2025-06-05 07:00:00','2025-06-30','P'),(12,5,'Pago renta','Pago de mi parte de la renta',3,200.00,'2025-06-05 07:00:00','2025-06-30','P');
 /*!40000 ALTER TABLE `ticket` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -211,12 +211,12 @@ DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `usuario` varchar(45) NOT NULL,
-  `password` varchar(45) NOT NULL,
-  `correo` varchar(45) NOT NULL,
-  `telefono` varchar(45) NOT NULL,
+  `password` blob NOT NULL,
+  `correo` blob NOT NULL,
+  `telefono` blob NOT NULL,
   `estado` varchar(1) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabla con informacion del usuario';
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabla con informacion del usuario';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -225,7 +225,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (3,'Gael','HOLA12','gaelvalenzuela2309@gmail.com','6682272112',''),(4,'Filiberto','UnaMotomamiPlis1','filiberogalvez@gmail.com','6688858358',''),(5,'Jorge','hola12','jorge@gmail.com','6682542660',NULL);
+INSERT INTO `usuarios` VALUES (3,'Gael',_binary '¯,r\Í˝VcÇN_c0\Ï´≤',_binary 'ˆc\'36&r8ñ\√\Ô\ÂÑ)Ø\Ë\„í\€u\ÿoQ;T†2',_binary 'ÒE\∆x\◊#§\∆˛£t∑BëW\ƒ','A'),(4,'Filiberto',_binary 'V,±:\ÿ\Zd;]1\“‘Ö&∫®bæûúñ˜\Ô†±\"',_binary 'ZQ§\ZV{£\Óˇ\Ôz||5D˜û±;˚\·\Ê\"≠˛jU',_binary 'Ø{òOE\'\'\ÂfüÅ¯Mi4','A'),(5,'Jorge',_binary '¿à$î´BΩKú{≥°ka',_binary '±\rè\ƒ%v:\‡m\€\›\Î4\“:\’',_binary 'ª¿=cP±˛\Áî›ÄÑÄC ',NULL),(6,'Alan',_binary 'µ»ÄwQø°”Ü¨e\Œ#ò',_binary '\Ã1\◊W\·$\r9∞ƒ´\n:¯ˇ\‘ ï$uXKãˇ¶l˙Mh\Ì',_binary '§WÚ< v$¨ŸÇ\‚zP\Õr','A');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -246,4 +246,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-27 23:23:01
+-- Dump completed on 2025-06-04 21:42:28
