@@ -38,7 +38,7 @@
             <button class="btn-primary">
               {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
             </button>
-            <button *ngIf="esCreador" class="btn-primary">Revisar Ticket</button>
+            <button *ngIf="esCreador" class="btn-primary" (click)="abrirModalRevisar()">Revisar Ticket</button>
             <button class="btn-primary" (click)="generarPDFgrupal()">Generar reporte del hogar</button>
           </div>
         </div>
@@ -213,3 +213,70 @@
     </div>
   </div>
 </div>
+
+
+<!--  -->
+<!-- SECCCIÓN DE MOSTRAR TICKET -->
+ <!--  -->
+<div class="modal" [class.show]="mostrarModalRevisar" *ngIf="mostrarModalRevisar">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Revisar Tickets Pendientes</h4>
+        <button type="button" class="btn-close" (click)="cerrarModalRevisar()"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div *ngIf="ticketsPendientes.length === 0" class="text-center p-4">
+          <p class="text-muted">No hay tickets pendientes por revisar</p>
+        </div>
+        
+        <div *ngIf="ticketsPendientes.length > 0" class="tickets-container">
+          <div class="ticket-card" *ngFor="let ticket of ticketsPendientes" [class.processing]="procesandoTicket">
+            <div class="ticket-header">
+              <h5 class="ticket-title">{{ ticket.nombre }}</h5>
+              <span class="ticket-amount">${{ ticket.monto_total | number:'1.2-2' }}</span>
+            </div>
+            
+            <div class="ticket-info">
+              <div class="info-row">
+                <strong>Solicitante:</strong> {{ ticket.nombre_usuario }}
+              </div>
+              <div class="info-row">
+                <strong>Categoría:</strong> {{ ticket.nombre_categoria || 'Sin categoría' }} 
+              </div>
+              <div class="info-row">
+                <strong>Descripción:</strong> {{ ticket.descripcion || 'Sin descripción' }}
+              </div>
+              <div class="info-row">
+                <strong>Fecha expiración:</strong> {{ ticket.fecha_expiracion  }}
+              </div>
+            </div>
+            
+            <div class="ticket-actions">
+              <button 
+                class="btn btn-success" 
+                (click)="aprobarTicket(ticket.id)"
+                [disabled]="procesandoTicket">
+                <i class="fas fa-check"></i> Aprobar
+              </button>
+              <button 
+                class="btn btn-danger" 
+                (click)="rechazarTicket(ticket.id)"
+                [disabled]="procesandoTicket">
+                <i class="fas fa-times"></i> Rechazar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="cerrarModalRevisar()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" *ngIf="mostrarModalRevisar" (click)="cerrarModalRevisar()"></div>

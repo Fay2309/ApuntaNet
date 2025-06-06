@@ -4,8 +4,9 @@ import { RouterModule, Router } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { HogarService } from '@app/services/hogar.service';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import { autoTable } from 'jspdf-autotable';
+import { TicketPendiente } from './gestionarhogar.interface';
 
 
 @Component({
@@ -32,6 +33,9 @@ export class GestionarhogarComponent {
   nombreUsuario: string = '';
   categoriasDisponibles: any[] = []; 
   categoriasSeleccionadas: any[] = [];
+  ticketsPendientes: TicketPendiente[] = [];
+  mostrarModalRevisar = false;
+  procesandoTicket = false;
   descripcionCategoria: string = '';
 
   private subscription: Subscription = new Subscription();
@@ -81,6 +85,12 @@ export class GestionarhogarComponent {
       )
     );
 
+    this.subscription.add(
+      this.hogarService.idUsuario$.subscribe(
+        id_usuario => this.IdUsuario = id_usuario
+      )
+    );
+
     const id = sessionStorage.getItem('idHogar');
     const nombre = sessionStorage.getItem('nombreHogar');
     const creador = sessionStorage.getItem('esCreador');
@@ -111,6 +121,7 @@ export class GestionarhogarComponent {
   if (id_usuario) {
     this.IdUsuario = +id_usuario;
   }
+  console.log('ID del hogar:', this.IdUsuario);
 }
   ngOnDestroy() {
     this.subscription.unsubscribe();
@@ -269,6 +280,67 @@ resetearCampos(): void {
   this.submitted = false;
 }
 
+async abrirModalRevisar(): Promise<void> {
+  if (!this.idHogar) {
+    console.warn('No hay ID de hogar disponible');
+    return;
+  }
+
+  try {
+    const response = await this.hogarService.obtenerTicketsPendientes(this.idHogar).toPromise();
+    
+    if (response.status === 'success') {
+      this.ticketsPendientes = response.tickets;
+      this.mostrarModalRevisar = true;
+    } else {
+      console.error('Error al obtener tickets pendientes:', response.message);
+    }
+  } catch (error) {
+    console.error('Error al cargar tickets pendientes:', error);
+  }
+}
+
+async aprobarTicket(idTicket: number): Promise<void> {
+  await this.procesarTicket(idTicket, 'A', 'aprobado');
+  this.cerrarModalRevisar();
+}
+
+async rechazarTicket(idTicket: number): Promise<void> {
+  await this.procesarTicket(idTicket, 'R', 'rechazado');
+  this.cerrarModalRevisar();
+}
+
+private async procesarTicket(idTicket: number, estado: string, accion: string): Promise<void> {
+  if (this.procesandoTicket) return;
+  
+  this.procesandoTicket = true;
+  
+  try {
+    const response = await this.hogarService.actualizarEstadoTicket(idTicket, estado).toPromise();
+    
+    if (response.status === 'success') {
+      console.log(`Ticket ${accion} exitosamente`);
+      
+      this.ticketsPendientes = this.ticketsPendientes.filter(ticket => ticket.id !== idTicket);
+      
+      if (this.ticketsPendientes.length === 0) {
+        this.cerrarModalRevisar();
+      }
+    } else {
+      console.error(`Error al ${accion.substring(0, accion.length - 1)}ar ticket:`, response.message);
+    }
+  } catch (error) {
+    console.error(`Error al ${accion.substring(0, accion.length - 1)}ar ticket:`, error);
+  } finally {
+    this.procesandoTicket = false;
+  }
+  console.log('Tickets cargados:', this.ticketsPendientes);
+}
+
+cerrarModalRevisar(): void {
+  this.mostrarModalRevisar = false;
+  this.ticketsPendientes = [];
+}
 
 //
 // // FUNCIONES PARA GESTIONAR RESIDENTES
@@ -287,7 +359,6 @@ resetearCampos(): void {
       }
     }
   }
-
 
 //
 // // CONTROL DE ERRORES

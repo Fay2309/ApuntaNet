@@ -61,7 +61,13 @@ crearTicket(ticket: any): Observable<any> {
   return this.http.post(`${this.apiresidentes}/tickets`, ticket);
 }
 
+obtenerTicketsPendientes(idHogar: number): Observable<any> {
+  return this.http.get<any>(`${this.apiresidentes}/tickets/pendientes/${idHogar}`);
+}
 
+actualizarEstadoTicket(idTicket: number, estado: string): Observable<any> { 
+  return this.http.put<any>(`${this.apiresidentes}/tickets/${idTicket}/estado`, { estado });
+}
 
 //
 // // METODOS PARA ENVIAR DATOS DESDE BIENVENIDA A GESTIONAR HOGAR
@@ -104,6 +110,7 @@ crearTicket(ticket: any): Observable<any> {
 
   setIdUsuario(id_usuario: number) {
     this.idUsuarioSubject.next(id_usuario);
+    sessionStorage.setItem('IdUsuario', id_usuario.toString());
   }
 
   getIdUsuario(): number | null {

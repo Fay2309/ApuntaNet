@@ -158,7 +158,6 @@ def salirse_hogar():
         
         cursor = conexion.cursor() 
 
-        # 1. Verificar si el usuario es el creador
         cursor.execute("SELECT id FROM hogar WHERE id_usuario = %s", (id_usuario,))
         creador_hogar = cursor.fetchone()
 
@@ -431,6 +430,81 @@ def crear_ticket():
 
     finally:
         cursor.close()
+
+#ruta para obtener los tickets PENDIENTES de un hogar
+@Api.route("/tickets/pendientes/<int:id_hogar>", methods=["GET"])
+def obtener_tickets_pendientes(id_hogar):
+    try:
+        query = """
+            SELECT 
+                t.id,
+                t.nombre,
+                t.descripcion,
+                t.monto_total,
+                t.fecha_creacion,
+                t.fecha_expiracion,
+                u.usuario as nombre_usuario,
+                c.nombre as nombre_categoria
+            FROM ticket t
+            JOIN usuarios u ON t.id_usuario = u.id
+            JOIN categorias_hogar ch ON t.id_categoriahogar = ch.id
+            JOIN categoria c ON ch.id_categoria = c.id
+            WHERE ch.id_hogar = %s AND t.estado = 'P'
+            ORDER BY t.fecha_creacion DESC
+        """
+        
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute(query, (id_hogar,))
+        tickets = cursor.fetchall()
+        
+        for ticket in tickets:
+            if ticket['fecha_creacion']:
+                ticket['fecha_creacion'] = ticket['fecha_creacion'].isoformat()
+            if ticket['fecha_expiracion']:
+                ticket['fecha_expiracion'] = ticket['fecha_expiracion'].isoformat()
+        
+        return jsonify({"status": "success", "tickets": tickets}), 200
+        
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+        
+    finally:
+        cursor.close()
+
+#esta ruta sirve para actualizar el estado de un ticket
+#se le pasa el id del ticket y el nuevo estado, el cual puede ser 'A' (Aprobado) o 'R' (Rechazado)
+@Api.route("/tickets/<int:id_ticket>/estado", methods=["PUT"])
+def actualizar_estado_ticket(id_ticket):
+    cursor = None 
+    try:
+        data = request.json
+        nuevo_estado = data.get("estado")
+        
+        if nuevo_estado not in ['A', 'R']:
+            return jsonify({"status": "error", "message": "Estado inválido. Debe ser 'A' (Aprobado) o 'R' (Rechazado)"}), 400
+        
+        query = """
+            UPDATE ticket 
+            SET estado = %s
+            WHERE id = %s
+        """
+        
+        cursor = conexion.cursor()
+        cursor.execute(query, (nuevo_estado, id_ticket))
+        conexion.commit()
+        
+        if cursor.rowcount == 0:
+            return jsonify({"status": "error", "message": "Ticket no encontrado"}), 404
+        
+        estado_texto = "aprobado" if nuevo_estado == 'A' else "rechazado"
+        return jsonify({"status": "success", "message": f"Ticket {estado_texto} correctamente"}), 200
+        
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+        
+    finally:
+        if cursor:
+            cursor.close()  
 
 
 #funcion utulizada para crear un codigo aleatorio de 6 caracteres, el cual se utiliza para agregar usuarios a los hogares

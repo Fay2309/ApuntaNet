@@ -133,6 +133,7 @@ private async cargarDatosIniciales(): Promise<void> {
   logout(): void {
     sessionStorage.removeItem('usuario');
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('usuarioId');
     this.router.navigate(['/login']); 
   }
 
