@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { firstValueFrom} from 'rxjs';
@@ -10,7 +10,7 @@ import { unirseHogarService } from '@app/services/unirseHogar.service';
 @Component({
   selector: 'app-bienvenida',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [RouterModule, ReactiveFormsModule],
   templateUrl: './bienvenida.component.html',
   styleUrl: './bienvenida.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

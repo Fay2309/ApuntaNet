@@ -9,47 +9,61 @@
       <div class="form-group">
         <label>Nombre de Usuario</label>
         <input type="text" formControlName="usuario" placeholder="Usuario">
-        <small *ngIf="registroForm.get('usuario')?.invalid && registroForm.get('usuario')?.touched" class="text-error">
-          El nombre de usuario es obligatorio.
-        </small>
+        @if (registroForm.get('usuario')?.invalid && registroForm.get('usuario')?.touched) {
+          <small class="text-error">
+            El nombre de usuario es obligatorio.
+          </small>
+        }
       </div>
 
       <div class="form-group">
         <label>Correo electrónico</label>
         <input type="email" formControlName="correo" placeholder="Correo">
-        <small *ngIf="registroForm.get('correo')?.errors?.['required'] && registroForm.get('correo')?.touched" class="text-error">
-          El correo es obligatorio.
-        </small>
-        <small *ngIf="registroForm.get('correo')?.errors?.['email'] && registroForm.get('correo')?.touched" class="text-error">
-          El correo no es válido.
-        </small>
+        @if (registroForm.get('correo')?.errors?.['required'] && registroForm.get('correo')?.touched) {
+          <small class="text-error">
+            El correo es obligatorio.
+          </small>
+        }
+        @if (registroForm.get('correo')?.errors?.['email'] && registroForm.get('correo')?.touched) {
+          <small class="text-error">
+            El correo no es válido.
+          </small>
+        }
       </div>
 
       <div class="form-group">
         <label>Contraseña</label>
         <input type="password" formControlName="password" placeholder="Contraseña">
-        <small *ngIf="registroForm.get('password')?.errors?.['required'] && registroForm.get('password')?.touched" class="text-error">
-          La contraseña es obligatoria.
-        </small>
-        <small *ngIf="registroForm.get('password')?.errors?.['pattern'] && registroForm.get('password')?.touched" class="text-error">
-          Debe contener al menos una letra y un número.
-        </small>
+        @if (registroForm.get('password')?.errors?.['required'] && registroForm.get('password')?.touched) {
+          <small class="text-error">
+            La contraseña es obligatoria.
+          </small>
+        }
+        @if (registroForm.get('password')?.errors?.['pattern'] && registroForm.get('password')?.touched) {
+          <small class="text-error">
+            Debe contener al menos una letra y un número.
+          </small>
+        }
       </div>
 
       <div class="form-group">
         <label>Confirmar contraseña</label>
         <input type="password" formControlName="confirmarPassword" placeholder="Confirmar contraseña">
-        <small *ngIf="registroForm.errors?.['mismatch'] && registroForm.get('confirmarPassword')?.touched" class="text-error">
-          Las contraseñas no coinciden.
-        </small>
+        @if (registroForm.errors?.['mismatch'] && registroForm.get('confirmarPassword')?.touched) {
+          <small class="text-error">
+            Las contraseñas no coinciden.
+          </small>
+        }
       </div>
 
       <div class="form-group">
         <label>Número de teléfono</label>
         <input type="text" formControlName="telefono" placeholder="Teléfono">
-        <small *ngIf="registroForm.get('telefono')?.invalid && registroForm.get('telefono')?.touched" class="text-error">
-          El número de teléfono es obligatorio.
-        </small>
+        @if (registroForm.get('telefono')?.invalid && registroForm.get('telefono')?.touched) {
+          <small class="text-error">
+            El número de teléfono es obligatorio.
+          </small>
+        }
       </div>
 
       <button type="submit" class="btn btn-primary mt-3" [disabled]="registroForm.invalid">Registrarme</button>
