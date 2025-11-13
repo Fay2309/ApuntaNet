@@ -187,7 +187,7 @@ crearHogar(): void {
       next: (respuesta) => {
         console.log('Respuesta del servidor:', respuesta);
         this.cerrarModal();
-        window.location.reload();
+        window.location.href = '/';
       },
       error: (error) => {
         if (error.status === 400 && error.error.message) {
@@ -220,7 +220,7 @@ ingresarHogar(): void {
       next: (respuesta) => {
         console.log('Ingreso exitoso al hogar:', respuesta);
         this.cerrarModal();
-        window.location.reload();
+        window.location.href = '/';
       },
       error: (error) => {
         if (error.status === 400 && error.error.message) {
@@ -247,7 +247,7 @@ salirseOHogar() {
       this.hogarService.salirseDelHogar(token).subscribe({
         next: (res: any) => {
           alert(res.message);
-          window.location.reload();
+          window.location.href = '/';
         },
         error: (err) => alert(err.error.message)
       });
@@ -257,7 +257,7 @@ salirseOHogar() {
       this.hogarService.salirseDelHogar(token).subscribe({
         next: (res: any) => {
           alert(res.message);
-          window.location.reload();
+          window.location.href = '/';
         },
         error: (err) => alert(err.error.message)
       });
