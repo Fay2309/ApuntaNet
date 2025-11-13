@@ -41,7 +41,7 @@ export class RegistroComponent {
       this.authService.registro(usuario, password, correo, telefono).subscribe({
         next: (respuesta) => {
           console.log('Registro exitoso:', respuesta);
-          this.router.navigate(['/login']); // AQUI EL CAMBIO DE PÁGINA
+          this.router.navigate(['/login']); 
         },
         error: (err) => {
           console.error('Registro fallido:', err);

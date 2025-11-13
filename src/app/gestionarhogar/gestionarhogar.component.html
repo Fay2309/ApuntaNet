@@ -27,7 +27,7 @@
         </nav>
         <section class="hogar-contenido">
           <!-- SECCIÓN DE CONTROL DE GASTOS -->
-          @if (seccionActiva === 'gastos') {
+          <!--@if (seccionActiva === 'gastos') {
             <div>
               <h3>Control de Gastos</h3>
               <div class="grid-gastos-tres-columnas">
@@ -45,10 +45,10 @@
                 <button class="btn-primary" (click)="generarPDFgrupal()">Generar reporte del hogar</button>
               </div>
             </div>
-          }
+          } -->
 
           <!-- SECCIÓN DE CONTROL DE RESIDENTES -->
-          @if (seccionActiva === 'residentes' && residentes.length > 0) {
+          <!--@if (seccionActiva === 'residentes' && residentes.length > 0) {
             <div class="seccion-residentes">
               <div class="grid-residentes">
                 @for (r of residentes; track r) {
@@ -64,7 +64,7 @@
                   }
                 </div>
               </div>
-            }
+            }-->
           </section>
         </div>
       </div>

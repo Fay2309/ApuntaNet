@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-
 import { provideRouter } from '@angular/router';
+
 import { LoginComponent } from './login/login.component';
 import { RegistroComponent } from './registro/registro.component'
 import { BienvenidaComponent } from './bienvenida/bienvenida.component';

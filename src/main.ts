@@ -8,7 +8,7 @@ import { provideHttpClient } from '@angular/common/http';
 
 const token = sessionStorage.getItem('token');
 
-const protectedRoutes = ['/bienvenida']; 
+const protectedRoutes = ['/bienvenida', '/gestionarhogar']; 
 
 if(!token && protectedRoutes.includes(location.pathname)){
     location.href = '/login';
