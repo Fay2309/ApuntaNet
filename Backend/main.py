@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='hola12',
+                                   password='201614',
                                    host='localhost',
                                    database='apuntanet_db')
 
@@ -31,13 +31,8 @@ def login():
     cursor.close()
 
     if resultado:
-        token = jwt.encode({
-            'usuario': usuario,
-            'id_usuario': resultado[0]
-        },
-        SECRET_KEY, algorithm='HS256')
 
-        return jsonify({"status": "Correcto", "message": "Inicio de sesión exitoso", "token": token}), 200
+        return jsonify({"status": "Correcto", "message": "Inicio de sesión exitoso"}), 200
     else:
         return jsonify({"status": "error", "message": "Credenciales incorrectas"}), 401
 
