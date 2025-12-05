@@ -7,7 +7,7 @@
     <div class="usuario">
       <span>Bienvenido <strong>{{ nombreUsuario }}</strong></span>
       <img src="/usuario.png" alt="Usuario" class="avatar" (click)="toggleMenu()"/>
-      
+
       <div class="menu" [class.visible]="menuVisible">
         <button class="btnMenuUsuario" (click)="logout()">Cerrar sesión</button>
       </div>
@@ -16,116 +16,147 @@
 
   <div class="cardbienvenida">
     <div class="bienvenida-container">
-      <p *ngIf="nombreHogar">Perteneces al hogar: <span style="color: #0e7de5;"><strong>{{ nombreHogar }}</strong></span></p>
-      <p *ngIf="esCreador">Código hogar: <span style="color: #0e7de5;"><strong>{{ codigoHogar }}</strong></span></p>
-      <hr *ngIf="nombreHogar">
+      @if (nombreHogar) {
+        <p>Perteneces al hogar: <span style="color: #0e7de5;"><strong>{{ nombreHogar }}</strong></span></p>
+      }
+      @if (esCreador) {
+        <p>Código hogar: <span style="color: #0e7de5;"><strong>{{ codigoHogar }}</strong></span></p>
+      }
+      @if (nombreHogar) {
+        <hr>
+        }
 
-    <div *ngIf="isLoading" class="loading-container">
-      <div class="spinner"></div>
-      <p>Cargando información...</p>
-    </div>
-      
-    <main class="acciones" *ngIf="!isLoading && datosUsuarioCargados">
-      <h2 *ngIf="!nombreHogar">¿Qué deseas hacer?</h2>
-      <div class="botones" *ngIf="!nombreHogar">
-        <button class="accion" (click)="mostrarModalIngresar()">
-          <span>Ingresar a un hogar</span>
-          <img src="/iniciar-sesion.png" alt="Ingresar" />
-        </button>
-        <button class="accion" (click)="mostrarModalCrear()">
-          <span>Crear un hogar</span>
-          <img src="/casa.png" alt="Crear" />
-        </button>
-      </div>
+        @if (isLoading) {
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <p>Cargando información...</p>
+          </div>
+        }
 
-      <h2 *ngIf="nombreHogar">¿Qué deseas hacer?</h2>
-      <div class="botones" *ngIf="nombreHogar">
-        <button class="accion" routerLink="/gestionarhogar">
-          <span>Gestionar hogar</span>
-          <img src="/hogar.png" alt="Gestionar" class="concasa" />
-        </button>
-        <button class="accion" (click)="salirseOHogar()">
-          <span>{{ esCreador ? 'Disolver hogar' : 'Salir del hogar' }}</span>
-          <img *ngIf="esCreador" src="/arruinado.png" alt="Salir" class="concasa" />
-          <img *ngIf="!esCreador" src="/puerta-abierta.png" alt="Salir" class="concasa" />
-        </button>
-      </div>
-    </main>
-      </div>
-    </div>
-  </div>
-
-<!--  -->
-  <!-- CREAR CASA -->
-   <!--  -->
-  <div class="modal-fondo" *ngIf="modalVisible==1 && error==1">
-    <div class="modal-contenido">
-      <div class="modal-header">
-        <h3>Crear nuevo hogar</h3>
-      </div>
-      <div class="modal-body">
-        <form [formGroup]="crearHogarForm" (ngSubmit)="crearHogar()">
-          <div class="form-grupo">
-            <label for="nombreHogar">Nombre Hogar *</label>
-            <input 
-              type="text" 
-              id="nombreHogar" 
-              formControlName="nombreHogar"
-              [class.error]="(crearHogarForm.get('nombreHogar')?.touched || submitted) && crearHogarForm.get('nombreHogar')?.invalid"
-            >
-            <div class="mensaje-error" *ngIf="getMensajeError('nombreHogar')">
-              {{ getMensajeError('nombreHogar') }}
-            </div>
-          </div>
-          <div class="form-grupo">
-            <label for="descripcion">Descripción</label>
-            <textarea 
-              id="descripcion" 
-              formControlName="descripcion"
-              rows="4"
-              [class.error]="(crearHogarForm.get('descripcion')?.touched || submitted) && crearHogarForm.get('descripcion')?.invalid"
-            ></textarea>
-            <div class="mensaje-error" *ngIf="getMensajeError('descripcion')">
-              {{ getMensajeError('descripcion') }}
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn-primary">Crear Hogar</button>
-          </div>
-        </form>
+        @if (!isLoading && datosUsuarioCargados) {
+          <main class="acciones">
+            @if (!nombreHogar) {
+              <h2>¿Qué deseas hacer?</h2>
+            }
+            @if (!nombreHogar) {
+              <div class="botones">
+                <button class="accion" (click)="mostrarModalIngresar()">
+                  <span>Ingresar a un hogar</span>
+                  <img src="/iniciar-sesion.png" alt="Ingresar" />
+                </button>
+                <button class="accion" (click)="mostrarModalCrear()">
+                  <span>Crear un hogar</span>
+                  <img src="/casa.png" alt="Crear" />
+                </button>
+              </div>
+            }
+            @if (nombreHogar) {
+              <h2>¿Qué deseas hacer?</h2>
+            }
+            @if (nombreHogar) {
+              <div class="botones">
+                <button class="accion" routerLink="/gestionarhogar">
+                  <span>Gestionar hogar</span>
+                  <img src="/hogar.png" alt="Gestionar" class="concasa" />
+                </button>
+                <button class="accion" (click)="salirseOHogar()">
+                  <span>{{ esCreador ? 'Disolver hogar' : 'Salir del hogar' }}</span>
+                  @if (esCreador) {
+                    <img src="/arruinado.png" alt="Salir" class="concasa" />
+                  }
+                  @if (!esCreador) {
+                    <img src="/puerta-abierta.png" alt="Salir" class="concasa" />
+                  }
+                </button>
+              </div>
+            }
+          </main>
+        }
       </div>
     </div>
   </div>
-  
+
   <!--  -->
-  <!-- INGRESAR CASA -->
-   <!--  -->
-    <div class="modal-fondo" *ngIf="modalVisible==2 && error==2">
-    <div class="modal-contenido">
-      <div class="modal-header">
-        <h3>Ingresar a un hogar</h3>
+  <!-- CREAR CASA -->
+  <!--  -->
+  @if (modalVisible==1 && error==1) {
+    <div class="modal-fondo">
+      <div class="modal-contenido">
+        <div class="modal-header">
+          <h3>Crear nuevo hogar</h3>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="crearHogarForm" (ngSubmit)="crearHogar()">
+            <div class="form-grupo">
+              <label for="nombreHogar">Nombre Hogar *</label>
+              <input
+                type="text"
+                id="nombreHogar"
+                formControlName="nombreHogar"
+                [class.error]="(crearHogarForm.get('nombreHogar')?.touched || submitted) && crearHogarForm.get('nombreHogar')?.invalid"
+                >
+                @if (getMensajeError('nombreHogar')) {
+                  <div class="mensaje-error">
+                    {{ getMensajeError('nombreHogar') }}
+                  </div>
+                }
+              </div>
+              <div class="form-grupo">
+                <label for="descripcion">Descripción</label>
+                <textarea
+                  id="descripcion"
+                  formControlName="descripcion"
+                  rows="4"
+                  [class.error]="(crearHogarForm.get('descripcion')?.touched || submitted) && crearHogarForm.get('descripcion')?.invalid"
+                ></textarea>
+                @if (getMensajeError('descripcion')) {
+                  <div class="mensaje-error">
+                    {{ getMensajeError('descripcion') }}
+                  </div>
+                }
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                <button type="submit" class="btn-primary">Crear Hogar</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-      <div class="modal-body">
-        <form [formGroup]="ingresarHogarForm" (ngSubmit)="ingresarHogar()">
-          <div class="form-grupo">
-            <label for="codigoHogar">Código hogar *</label>
-            <input 
-              type="text" 
-              id="codigoHogar" 
-              formControlName="codigoHogar"
-              [class.error]="(ingresarHogarForm.get('codigoHogar')?.touched || submitted) && ingresarHogarForm.get('codigoHogar')?.invalid"
-            >
-            <div class="mensaje-error" *ngIf="getMensajeError('codigoHogar')">
-              {{ getMensajeError('codigoHogar') }}
+    }
+
+    <!--  -->
+    <!-- INGRESAR CASA -->
+    <!--  -->
+    @if (modalVisible==2 && error==2) {
+      <div class="modal-fondo">
+        <div class="modal-contenido">
+          <div class="modal-header">
+            <h3>Ingresar a un hogar</h3>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="ingresarHogarForm" (ngSubmit)="ingresarHogar()">
+              <div class="form-grupo">
+                <label for="codigoHogar">Código hogar *</label>
+                <input
+                  type="text"
+                  id="codigoHogar"
+                  formControlName="codigoHogar"
+                  [class.error]="(ingresarHogarForm.get('codigoHogar')?.touched || submitted) && ingresarHogarForm.get('codigoHogar')?.invalid"
+                  >
+                  @if (getMensajeError('codigoHogar')) {
+                    <div class="mensaje-error">
+                      {{ getMensajeError('codigoHogar') }}
+                    </div>
+                  }
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">Ingresar a hogar</button>
+                </div>
+              </form>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn-primary">Ingrear a hogar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+        </div>
+      }
 

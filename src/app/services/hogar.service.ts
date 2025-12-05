@@ -47,12 +47,27 @@ obtenerCategoriasDisponibles(idHogar: number): Observable<any> {
   return this.http.get(`${this.apicategoriasdisponibles}${idHogar}`);
 }
 
+obtenerCategoriasSeleccionadas(idHogar: number): Observable<any[]> {
+  return this.http.get<any[]>(`http://localhost:5000/categorias/seleccionadas/${idHogar}`);
+}
+
 getResidentes(idHogar: number) {  
   return this.http.get<{ status: string, residentes: any[] }>(
     `${this.apiresidentes}/hogar/residentes/${idHogar}`
   );
 }
 
+crearTicket(ticket: any): Observable<any> {
+  return this.http.post(`${this.apiresidentes}/tickets`, ticket);
+}
+
+obtenerTicketsPendientes(idHogar: number): Observable<any> {
+  return this.http.get<any>(`${this.apiresidentes}/tickets/pendientes/${idHogar}`);
+}
+
+actualizarEstadoTicket(idTicket: number, estado: string): Observable<any> { 
+  return this.http.put<any>(`${this.apiresidentes}/tickets/${idTicket}/estado`, { estado });
+}
 
 //
 // // METODOS PARA ENVIAR DATOS DESDE BIENVENIDA A GESTIONAR HOGAR
@@ -65,6 +80,9 @@ getResidentes(idHogar: number) {
 
   private esCreadorSubject = new BehaviorSubject<boolean>(false);
   esCreador$ = this.esCreadorSubject.asObservable();
+
+  private idUsuarioSubject = new BehaviorSubject<number | null>(null);
+  idUsuario$ = this.idUsuarioSubject.asObservable();
 
   setNombreHogar(nombre: string) {
     this.nombreHogarSubject.next(nombre);
@@ -88,6 +106,15 @@ getResidentes(idHogar: number) {
 
   getEsCreador(): boolean {
     return this.esCreadorSubject.value;
+  }
+
+  setIdUsuario(id_usuario: number) {
+    this.idUsuarioSubject.next(id_usuario);
+    sessionStorage.setItem('IdUsuario', id_usuario.toString());
+  }
+
+  getIdUsuario(): number | null {
+    return this.idUsuarioSubject.value;
   }
 }
 

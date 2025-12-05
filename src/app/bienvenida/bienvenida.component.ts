@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { firstValueFrom} from 'rxjs';
@@ -10,7 +10,7 @@ import { unirseHogarService } from '@app/services/unirseHogar.service';
 @Component({
   selector: 'app-bienvenida',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [RouterModule, ReactiveFormsModule],
   templateUrl: './bienvenida.component.html',
   styleUrl: './bienvenida.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -76,6 +76,7 @@ async ngOnInit(): Promise<void> {
       this.codigoHogar = hogar.codigo;
       this.enviarNombreHogar(this.nombreHogar);
       this.enviarIdHogar(hogar.id); 
+      this.enviarIdUsuario(this.usuarioId);
 
       sessionStorage.setItem('idHogar', String(hogar.id));
       sessionStorage.setItem('nombreHogar', this.nombreHogar);
@@ -132,6 +133,7 @@ private async cargarDatosIniciales(): Promise<void> {
   logout(): void {
     sessionStorage.removeItem('usuario');
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('usuarioId');
     this.router.navigate(['/login']); 
   }
 
@@ -141,6 +143,10 @@ private async cargarDatosIniciales(): Promise<void> {
 
   enviarIdHogar(id: number) {
     this.hogarService.setIdHogar(id);
+  }
+
+  enviarIdUsuario(id_usuario: number) {
+    this.hogarService.setIdUsuario(id_usuario);
   }
 
 // -------------------------------------------------------------------------------------------------------

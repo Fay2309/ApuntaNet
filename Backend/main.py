@@ -153,7 +153,6 @@ def salirse_hogar():
         
         cursor = conexion.cursor() 
 
-        # 1. Verificar si el usuario es el creador
         cursor.execute("SELECT id FROM hogar WHERE id_usuario = %s", (id_usuario,))
         creador_hogar = cursor.fetchone()
 
@@ -342,6 +341,24 @@ def obtener_categorias_disponibles(id_hogar):
     finally:
         cursor.close()
 
+#esta ruta sirve para consultar las categorias de un hogar
+#se le pasa el id del hogar, el cual se utiliza para obtener las categorias de ese hogar
+@Api.route("/categorias/seleccionadas/<int:id_hogar>", methods=["GET"])
+def obtener_categorias_seleccionadas(id_hogar):
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT ch.id AS id, c.nombre, c.descripcion
+            FROM categoria c
+            JOIN categorias_hogar ch ON c.id = ch.id_categoria
+            WHERE ch.id_hogar = %s
+        """, (id_hogar,))
+        categorias = cursor.fetchall()
+        return jsonify(categorias), 200
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+    finally:
+        cursor.close()
 
 #retorna el monto total y el nombre de la categoria, tomando en cuenta el mes y el año actual
 #se le pasa id del usuario y el id del hogar
@@ -376,40 +393,114 @@ def desglose():
         return jsonify({"status": "success", "desglose": desglose}), 200
     else:
         return jsonify({"status": "error", "message": "No se encontraron datos"}), 404
+    
+
+
 
 #sirve para obtener los tickets de los hogares al que pertenece el usuario
 #se le pasa el id del hogar y el id del usuario
-@Api.route("/ticketsIndividual/consultar", methods=['GET'])
-def tickets():
-    cursor = conexion.cursor()
-    token = request.get_json('token').split(" ")[1]
-    decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-    usuario = decoded_token['id_usuario']
-    hogar_id = request.args.get('hogar_id')
-    cursor.execute("""SELECT 
-                        ticket.nombre,
-                        ticket.descripcion,
-                        monto_individual.monto_abonado,
-                        monto_individual.monto_total,
-                        monto_individual.fecha_expiracion
-                    FROM
-                        monto_individual
-                    INNER JOIN  ticket ON monto_individual.id_ticket = ticket.id
-                    WHERE
-                        monto_individual.fecha_expiracion >= now() AND
-                        monto_individual.id_usuario = %s AND
-                        monto_individual.id_hogar = %s AND
-                        ticket.estado = "XPG"
-                    ORDER BY 
-                        monto_individual.fecha_expiracion ASC;
-""",(usuario, hogar_id))
-    resultado = cursor.fetchall()
-    cursor.close()
-    if resultado:
-        tickets = [{"nombre": row[0], "descripcion": row[1], "monto_abonado": row[2], "monto_total": row[3], "fecha_expiracion": row[4]} for row in resultado]
+@Api.route("/tickets", methods=["POST"])
+def crear_ticket():
+    try:
+        data = request.json
+
+        query = """
+            INSERT INTO ticket (
+                id_categoriahogar, nombre, descripcion, id_usuario, monto_total, fecha_creacion, fecha_expiracion, estado
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+
+        valores = (
+            data["id_categoriahogar"], data["nombre"], data.get("descripcion", ""), data["id_usuario"], data["monto_total"], data["fecha_creacion"] ,data["fecha_expiracion"], data["estado"]
+        )
+
+        cursor = conexion.cursor()
+        cursor.execute(query, valores)
+        conexion.commit()
+
+        return jsonify({"status": "success", "message": "Ticket creado correctamente"}), 201
+
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+
+    finally:
+        cursor.close()
+
+#ruta para obtener los tickets PENDIENTES de un hogar
+@Api.route("/tickets/pendientes/<int:id_hogar>", methods=["GET"])
+def obtener_tickets_pendientes(id_hogar):
+    try:
+        query = """
+            SELECT 
+                t.id,
+                t.nombre,
+                t.descripcion,
+                t.monto_total,
+                t.fecha_creacion,
+                t.fecha_expiracion,
+                u.usuario as nombre_usuario,
+                c.nombre as nombre_categoria
+            FROM ticket t
+            JOIN usuarios u ON t.id_usuario = u.id
+            JOIN categorias_hogar ch ON t.id_categoriahogar = ch.id
+            JOIN categoria c ON ch.id_categoria = c.id
+            WHERE ch.id_hogar = %s AND t.estado = 'P'
+            ORDER BY t.fecha_creacion DESC
+        """
+        
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute(query, (id_hogar,))
+        tickets = cursor.fetchall()
+        
+        for ticket in tickets:
+            if ticket['fecha_creacion']:
+                ticket['fecha_creacion'] = ticket['fecha_creacion'].isoformat()
+            if ticket['fecha_expiracion']:
+                ticket['fecha_expiracion'] = ticket['fecha_expiracion'].isoformat()
+        
         return jsonify({"status": "success", "tickets": tickets}), 200
-    else:
-        return jsonify({"status": "error", "message": "No se encontraron datos"}), 404
+        
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+        
+    finally:
+        cursor.close()
+
+#esta ruta sirve para actualizar el estado de un ticket
+#se le pasa el id del ticket y el nuevo estado, el cual puede ser 'A' (Aprobado) o 'R' (Rechazado)
+@Api.route("/tickets/<int:id_ticket>/estado", methods=["PUT"])
+def actualizar_estado_ticket(id_ticket):
+    cursor = None 
+    try:
+        data = request.json
+        nuevo_estado = data.get("estado")
+        
+        if nuevo_estado not in ['A', 'R']:
+            return jsonify({"status": "error", "message": "Estado inválido. Debe ser 'A' (Aprobado) o 'R' (Rechazado)"}), 400
+        
+        query = """
+            UPDATE ticket 
+            SET estado = %s
+            WHERE id = %s
+        """
+        
+        cursor = conexion.cursor()
+        cursor.execute(query, (nuevo_estado, id_ticket))
+        conexion.commit()
+        
+        if cursor.rowcount == 0:
+            return jsonify({"status": "error", "message": "Ticket no encontrado"}), 404
+        
+        estado_texto = "aprobado" if nuevo_estado == 'A' else "rechazado"
+        return jsonify({"status": "success", "message": f"Ticket {estado_texto} correctamente"}), 200
+        
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+        
+    finally:
+        if cursor:
+            cursor.close()  
+
 
 #funcion utulizada para crear un codigo aleatorio de 6 caracteres, el cual se utiliza para agregar usuarios a los hogares
 def crearcodigo():

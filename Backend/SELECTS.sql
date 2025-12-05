@@ -75,7 +75,7 @@ correo = aes_encrypt('angul0alan@gmail.com','UnaDeCasaParaElGaelPlis'),
 telefono=aes_encrypt('6674473565','UnaDeCasaParaElGaelPlis')
 WHERE id = 6;
 
-SET FOREIGN_KEY_CHECKS = 1; #sirve para desctivar las foreing keys
+SET FOREIGN_KEY_CHECKS = 1;SET FOREIGN_KEY_CHECKS = 1; #sirve para desctivar las foreing keys
 
 ALTER TABLE usuarios AUTO_INCREMENT =8; # actualizar el auto incrementable de una tabla
 

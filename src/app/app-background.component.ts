@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-background',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="waves-container">
       <div class="wave wave-1"></div>

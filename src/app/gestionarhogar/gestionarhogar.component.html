@@ -6,102 +6,300 @@
     </div>
   </header>
 
-<div class="hogar-fondo">
-  <div class="hogar-container">
-    <div class="hogar-titulo" style="margin-bottom: 1rem;">
-      <p>Gestionando el hogar: <span class="hogar-nombre"><strong>{{ nombreHogar }}</strong></span></p>
-    </div>
-    <div class="hogar-main">
-      <nav class="hogar-menu">
-        <button 
-          class="menu-btn"
-          [ngClass]="{ 'activo': seccionActiva === 'gastos' }"
+  <div class="hogar-fondo">
+    <div class="hogar-container">
+      <div class="hogar-titulo" style="margin-bottom: 1rem;">
+        <p>Gestionando el hogar: <span class="hogar-nombre"><strong>{{ nombreHogar }}</strong></span></p>
+      </div>
+      <div class="hogar-main">
+        <nav class="hogar-menu">
+          <button
+            class="menu-btn"
+            [ngClass]="{ 'activo': seccionActiva === 'gastos' }"
           (click)="seccionActiva = 'gastos'">Control de Gastos</button>
 
-        <button 
-          class="menu-btn"
-          [ngClass]="{ 'activo': seccionActiva === 'residentes' }"
+          <button
+            class="menu-btn"
+            [ngClass]="{ 'activo': seccionActiva === 'residentes' }"
           (click)="mostrarResidentes()">Residentes</button>
 
-        <button class="menu-btn" routerLink="/bienvenida">Volver</button>
-      </nav>
-      <section class="hogar-contenido">
+          <button class="menu-btn" routerLink="/bienvenida">Volver</button>
+        </nav>
+        <section class="hogar-contenido">
           <!-- SECCIÓN DE CONTROL DE GASTOS -->
-        <div *ngIf="seccionActiva === 'gastos'">
-          <h3>Control de Gastos</h3>
-          <div class="grid-gastos-tres-columnas">
-            <button type="button" class="btn-primary" (click)="mostrarModalCategoria(); $event.stopPropagation()">Agregar categoria</button>
-            <button class="btn-primary">Generar ticket</button>
-            <button class="btn-primary" (click)="generarPDF()">
-              Generar reporte individual
-            </button>
-            <button class="btn-primary">
-              {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
-            </button>
-            <button *ngIf="esCreador" class="btn-primary">Revisar Ticket</button>
-            <button class="btn-primary" (click)="generarPDFgrupal()">Generar reporte del hogar</button>
-          </div>
-        </div>
-
-        <!-- SECCIÓN DE CONTROL DE RESIDENTES -->
-        <div *ngIf="seccionActiva === 'residentes' && residentes.length > 0" class="seccion-residentes">
-          <div class="grid-residentes">
-            <div class="tarjeta-residente" *ngFor="let r of residentes">
-              <strong>{{ r.usuario }}</strong>
-              <span *ngIf="r.es_creador" class="creador-tag"> (Creador)</span><br>
-              {{ r.correo }}<br>
-              {{ r.telefono }}<br>
-              <small>Fecha de ingreso: {{ r.fecha | date:'mediumDate' }}</small>
+          @if (seccionActiva === 'gastos') {
+            <div>
+              <h3>Control de Gastos</h3>
+              <div class="grid-gastos-tres-columnas">
+                <button type="button" class="btn-primary" (click)="mostrarModalCategoria(); $event.stopPropagation()">Agregar categoria</button>
+                <button class="btn-primary" (click)="mostrarModalTicket(); $event.stopPropagation()">Crear ticket</button>
+                <button class="btn-primary" (click)="generarPDF()">
+                  Generar reporte individual
+                </button>
+                <button class="btn-primary">
+                  {{ esCreador ? 'Monto hogar' : 'Monto individual' }}
+                </button>
+                @if (esCreador) {
+                  <button class="btn-primary" (click)="abrirModalRevisar()">Revisar Ticket</button>
+                }
+                <button class="btn-primary" (click)="generarPDFgrupal()">Generar reporte del hogar</button>
+              </div>
             </div>
+          }
+
+          <!-- SECCIÓN DE CONTROL DE RESIDENTES -->
+          @if (seccionActiva === 'residentes' && residentes.length > 0) {
+            <div class="seccion-residentes">
+              <div class="grid-residentes">
+                @for (r of residentes; track r) {
+                  <div class="tarjeta-residente">
+                    <strong>{{ r.usuario }}</strong>
+                    @if (r.es_creador) {
+                      <span class="creador-tag"> (Creador)</span>
+                      }<br>
+                      {{ r.correo }}<br>
+                      {{ r.telefono }}<br>
+                      <small>Fecha de ingreso: {{ r.fecha | date:'mediumDate' }}</small>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!--  -->
+    <!-- SECCCIÓN DE CREAR CATEGORIA -->
+    <!--  -->
+    @if (modalVisible==1 && error==1) {
+      <div class="modal-fondo">
+        <div class="modal-contenido" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Agregar categoría al hogar</h3>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="crearCategoriaForm" (ngSubmit)="crearCategoria()">
+              <div class="form-grupo">
+                <label for="categoriaSelect">Categoría *</label>
+                <select
+                  id="categoriaNueva"
+                  formControlName="categoriaNueva"
+                  [class.error]="(crearCategoriaForm.get('categoriaNueva')?.touched || submitted) && crearCategoriaForm.get('categoriaNueva')?.invalid"
+                  (change)="actualizarDescripcionCategoria()"
+                  >
+                  <option value="" disabled selected>Selecciona una categoria</option>
+                  @for (cat of categoriasDisponibles; track cat) {
+                    <option [value]="cat.id">
+                      {{ cat.nombre }}
+                    </option>
+                  }
+                </select>
+                @if (getMensajeError('categoriaNueva')) {
+                  <div class="mensaje-error">
+                    {{ getMensajeError('categoriaNueva') }}
+                  </div>
+                }
+              </div>
+              <div class="form-grupo">
+                <label for="descripcion">Descripción</label>
+                <textarea
+                  id="descripcion"
+                  [value]="descripcionCategoria"
+                  disabled
+                  rows="4"
+                ></textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                <button type="submit" class="btn-primary">Agregar categoría</button>
+              </div>
+            </form>
           </div>
         </div>
-      </section>
-    </div>
-  </div>
-</div>
+      </div>
+    }
 
-<!--  -->
-<!-- SECCCIÓN DE CREAR CATEGORIA -->
- <!--  -->
-<div class="modal-fondo" *ngIf="modalVisible==1 && error==1">
-  <div class="modal-contenido" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Agregar categoría al hogar</h3>
-    </div>
-    <div class="modal-body">
-      <form [formGroup]="crearCategoriaForm" (ngSubmit)="crearCategoria()">
-        <div class="form-grupo">
-          <label for="categoriaSelect">Categoría *</label>
-          <select 
-            id="categoriaSeleccionada"
-            formControlName="categoriaSeleccionada"
-            (change)="actualizarDescripcionCategoria()"
-          >
-            <option value="" disabled selected>Selecciona una categoria</option>
-            <option *ngFor="let cat of categoriasDisponibles" [value]="cat.id">
-              {{ cat.nombre }}
-            </option>
-          </select>
-          <div class="mensaje-error" *ngIf="getMensajeError('categoriaSeleccionada')">
-            {{ getMensajeError('categoriaSeleccionada') }}
+    <!--  -->
+    <!-- SECCCIÓN DE CREAR TICKET -->
+    <!--  -->
+    @if (modalVisible===2 && error===2) {
+      <div class="modal-fondo">
+        <div class="modal-contenido" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Agregar ticket al hogar</h3>
           </div>
-        </div>
+          <div class="modal-body">
+            <form [formGroup]="crearTicketForm" (ngSubmit)="crearTicket()">
+              <!-- NOMBRE Y MONTO -->
+              <div class="form-fila">
+                <div class="form-grupo form-grupo-medio">
+                  <label for="nombreTicket">Nombre del Ticket *</label>
+                  <input
+                    type="text"
+                    id="nombreTicket"
+                    formControlName="nombreTicket"
+                    [class.error]="(crearTicketForm.get('nombreTicket')?.touched || submitted) && crearTicketForm.get('nombreTicket')?.invalid"
+                    >
+                    @if (getMensajeError('nombreTicket')) {
+                      <div class="mensaje-error">
+                        {{ getMensajeError('nombreTicket') }}
+                      </div>
+                    }
+                  </div>
+                  <div class="form-grupo form-grupo-medio">
+                    <label for="montoTicket">Monto del Ticket *</label>
+                    <div class="input-moneda">
+                      <span class="simbolo-moneda">$</span>
+                      <input
+                        type="number"
+                        id="montoTicket"
+                        formControlName="montoTicket"
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        [class.error]="(crearTicketForm.get('montoTicket')?.touched || submitted) && crearTicketForm.get('montoTicket')?.invalid"
+                        >
+                      </div>
+                      @if (getMensajeError('montoTicket')) {
+                        <div class="mensaje-error">
+                          {{ getMensajeError('montoTicket') }}
+                        </div>
+                      }
+                    </div>
+                    <div class="form-grupo form-grupo-medio">
+                      <label for="categoriaTicket">Categoria *</label>
+                      <select
+                        id="categoriaSeleccionada"
+                        formControlName="categoriaSeleccionada"
+                        [class.error]="(crearTicketForm.get('categoriaSeleccionada')?.touched || submitted) && crearTicketForm.get('categoriaSeleccionada')?.invalid"
+                        >
+                        <option value="" disabled>Selecciona una categoría</option>
+                        @for (catS of categoriasSeleccionadas; track catS) {
+                          <option [value]="catS.id">
+                            {{ catS.nombre }}
+                          </option>
+                        }
+                      </select>
+                      @if (getMensajeError('categoriaSeleccionada')) {
+                        <div class="mensaje-error">
+                          {{ getMensajeError('categoriaSeleccionada') }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <!-- FECHAS -->
+                  <div class="form-fila">
+                    <div class="form-grupo form-grupo-medio">
+                      <label for="fechaCreacion">Fecha de Creación</label>
+                      <input
+                        type="date"
+                        id="fechaCreacion"
+                        formControlName="fechaCreacion"
+                        readonly
+                        class="campo-readonly"
+                        >
+                      </div>
+                      <div class="form-grupo form-grupo-medio">
+                        <label for="fechaExpiracion">Fecha de Expiración</label>
+                        <input
+                          type="date"
+                          id="fechaExpiracion"
+                          formControlName="fechaExpiracion"
+                          readonly
+                          class="campo-readonly"
+                          >
+                        </div>
+                      </div>
+                      <!-- DESCRIPCION -->
+                      <div class="form-grupo">
+                        <label for="descripcion">Descripción</label>
+                        <textarea
+                          id="descripcion"
+                          formControlName="descripcion"
+                          rows="4"
+                          placeholder="Ingresa una descripción del ticket..."
+                        ></textarea>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                        <button type="submit" class="btn-primary">Mandar ticket</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            }
 
-        <div class="form-grupo">
-          <label for="descripcion">Descripción</label>
-          <textarea 
-            id="descripcion" 
-            [value]="descripcionCategoria"
-            disabled
-            rows="4"
-          ></textarea>
-        </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-          <button type="submit" class="btn-primary">Agregar categoría</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+            <!--  -->
+            <!-- SECCCIÓN DE MOSTRAR TICKET -->
+            <!--  -->
+            @if (mostrarModalRevisar) {
+              <div class="modal" [class.show]="mostrarModalRevisar">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h4 class="modal-title">Revisar Tickets Pendientes</h4>
+                      <button type="button" class="btn-close" (click)="cerrarModalRevisar()"></button>
+                    </div>
+                    <div class="modal-body">
+                      @if (ticketsPendientes.length === 0) {
+                        <div class="text-center p-4">
+                          <p class="text-muted">No hay tickets pendientes por revisar</p>
+                        </div>
+                      }
+                      @if (ticketsPendientes.length > 0) {
+                        <div class="tickets-container">
+                          @for (ticket of ticketsPendientes; track ticket) {
+                            <div class="ticket-card" [class.processing]="procesandoTicket">
+                              <div class="ticket-header">
+                                <h5 class="ticket-title">{{ ticket.nombre }}</h5>
+                                <span class="ticket-amount">${{ ticket.monto_total | number:'1.2-2' }}</span>
+                              </div>
+                              <div class="ticket-info">
+                                <div class="info-row">
+                                  <strong>Solicitante:</strong> {{ ticket.nombre_usuario }}
+                                </div>
+                                <div class="info-row">
+                                  <strong>Categoría:</strong> {{ ticket.nombre_categoria || 'Sin categoría' }}
+                                </div>
+                                <div class="info-row">
+                                  <strong>Descripción:</strong> {{ ticket.descripcion || 'Sin descripción' }}
+                                </div>
+                                <div class="info-row">
+                                  <strong>Fecha expiración:</strong> {{ ticket.fecha_expiracion  }}
+                                </div>
+                              </div>
+                              <div class="ticket-actions">
+                                <button
+                                  class="btn btn-success"
+                                  (click)="aprobarTicket(ticket.id)"
+                                  [disabled]="procesandoTicket">
+                                  <i class="fas fa-check"></i> Aprobar
+                                </button>
+                                <button
+                                  class="btn btn-danger"
+                                  (click)="rechazarTicket(ticket.id)"
+                                  [disabled]="procesandoTicket">
+                                  <i class="fas fa-times"></i> Rechazar
+                                </button>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn-secondary" (click)="cerrarModalRevisar()">
+                        Cerrar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            @if (mostrarModalRevisar) {
+              <div class="modal-backdrop" (click)="cerrarModalRevisar()"></div>
+            }

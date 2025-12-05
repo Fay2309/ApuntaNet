@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth.service';
   standalone: true,
   templateUrl: './registro.component.html',
   styleUrls: ['./registro.component.scss'],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule]
+  imports: [ReactiveFormsModule, RouterModule]
 })
 export class RegistroComponent {
   registroForm: FormGroup;

@@ -4,8 +4,9 @@ import { RouterModule, Router } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { HogarService } from '@app/services/hogar.service';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import { autoTable } from 'jspdf-autotable';
+import { TicketPendiente } from './gestionarhogar.interface';
 
 
 @Component({
@@ -18,17 +19,23 @@ import autoTable from 'jspdf-autotable';
 })
 export class GestionarhogarComponent {
   public crearCategoriaForm: FormGroup;
+  public crearTicketForm: FormGroup;
   public submitted: boolean = false;
   public menuVisible: boolean = false;
   seccionActiva: string = 'gastos';
   nombreHogar: string = '';
   idHogar: number | null = null;
+  IdUsuario: number | null = null;
   esCreador: boolean = false;
   residentes: any[] = [];
   public modalVisible: number = 0;
   public error: number = 0;
   nombreUsuario: string = '';
   categoriasDisponibles: any[] = []; 
+  categoriasSeleccionadas: any[] = [];
+  ticketsPendientes: TicketPendiente[] = [];
+  mostrarModalRevisar = false;
+  procesandoTicket = false;
   descripcionCategoria: string = '';
 
   private subscription: Subscription = new Subscription();
@@ -39,12 +46,29 @@ export class GestionarhogarComponent {
     private cdr: ChangeDetectorRef,
     private elementRef: ElementRef, 
     ) {
+    const fechaActual = new Date();
+    const fechaExpiracion = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 30);
+
     this.crearCategoriaForm = this.fb.group({
-      categoriaSeleccionada: ['', Validators.required]
+      categoriaNueva: ['', Validators.required]
+    });
+    this.crearTicketForm = this.fb.group({
+      nombreTicket: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      descripcion: ['', [Validators.maxLength(200)]],
+      categoriaSeleccionada: [null, Validators.required],
+      montoTicket: ['', [Validators.required, Validators.min(0.01)]],
+      fechaCreacion: [{ 
+        value: fechaActual.toISOString().split('T')[0], 
+        disabled: true 
+      }],
+      fechaExpiracion: [{ 
+        value: fechaExpiracion.toISOString().split('T')[0], 
+        disabled: true 
+      }]
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.subscription = this.hogarService.nombreHogar$.subscribe(
       nombre => this.nombreHogar = nombre 
     );
@@ -61,17 +85,30 @@ export class GestionarhogarComponent {
       )
     );
 
+    this.subscription.add(
+      this.hogarService.idUsuario$.subscribe(
+        id_usuario => this.IdUsuario = id_usuario
+      )
+    );
+
     const id = sessionStorage.getItem('idHogar');
     const nombre = sessionStorage.getItem('nombreHogar');
     const creador = sessionStorage.getItem('esCreador');
     const nombreUsuario = sessionStorage.getItem('nombreUsuario');
+    const id_usuario = sessionStorage.getItem('IdUsuario');
     this.esCreador = creador === 'true';
 
   if (id && nombre) {
     this.idHogar = +id;
     this.nombreHogar = nombre;
     this.seccionActiva = 'gastos';
-    this.cargarCategoriasDisponibles();
+    
+    try {
+      await this.cargarCategoriasDisponibles();
+      await this.cargarCategoriasSeleccionadas();
+    } catch (error) {
+      console.error('Error al cargar categorías:', error);
+    }
   } else {
     console.warn("No se encontró información del hogar.");
     this.router.navigate(['/bienvenida']);
@@ -80,8 +117,12 @@ export class GestionarhogarComponent {
   if (nombreUsuario) {
     this.nombreUsuario = nombreUsuario;
   }
-  }
 
+  if (id_usuario) {
+    this.IdUsuario = +id_usuario;
+  }
+  console.log('ID del hogar:', this.IdUsuario);
+}
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
@@ -96,7 +137,16 @@ export class GestionarhogarComponent {
     this.cdr.detectChanges();
   }
 
+  mostrarModalTicket(): void {
+    this.modalVisible = 2;
+    this.error = 2;
+    this.submitted = false;
+    this.crearCategoriaForm.reset();
+    this.cdr.detectChanges();
+  }
+
   cerrarModal(): void {
+    this.submitted = false;
     this.modalVisible = 0;
     this.cdr.detectChanges();
   }
@@ -110,7 +160,7 @@ export class GestionarhogarComponent {
   if (this.crearCategoriaForm.valid) {
     const datos = {
       id_hogar: this.idHogar, 
-      id_categoria: this.crearCategoriaForm.value.categoriaSeleccionada
+      id_categoria: this.crearCategoriaForm.value.categoriaNueva
     };
 
     this.hogarService.agregarCategoriaAHogar(datos).subscribe({
@@ -133,29 +183,167 @@ export class GestionarhogarComponent {
 }
 
 actualizarDescripcionCategoria(): void {
-  const idSeleccionado = this.crearCategoriaForm.value.categoriaSeleccionada;
+  const idSeleccionado = this.crearCategoriaForm.value.categoriaNueva;
   const categoria = this.categoriasDisponibles.find(c => c.id == idSeleccionado);
   this.descripcionCategoria = categoria?.descripcion || '';
 }
 
-  cargarCategoriasDisponibles(): void {
+cargarCategoriasDisponibles(): Promise<void> {
+  return new Promise((resolve, reject) => {
     if (this.idHogar !== null) {
       this.hogarService.obtenerCategoriasDisponibles(this.idHogar).subscribe({
         next: (categorias) => {
           this.categoriasDisponibles = categorias;
+          resolve();
         },
         error: (err) => {
           console.error('Error al obtener categorías disponibles:', err);
+          reject(err);
         }
       });
     } else {
       console.warn('ID del hogar no definido para cargar categorías disponibles.');
+      resolve();
     }
-  }
+  });
+}
 
+cargarCategoriasSeleccionadas(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!this.idHogar) {
+      resolve();
+      return;
+    }
+
+    this.hogarService.obtenerCategoriasSeleccionadas(this.idHogar).subscribe({
+      next: (categorias) => {
+        this.categoriasSeleccionadas = categorias;
+        console.log('Categorías ya agregadas al hogar:', this.categoriasSeleccionadas);
+        resolve();
+      },
+      error: (error) => {
+        console.error('Error al cargar categorías seleccionadas:', error);
+        reject(error);
+      }
+    });
+  });
+}
 
 //
-// // FUNCIONES PARA GESTIONARR RESIDENTES
+// // FUNCIONES PARA GESTIONAR TICKETS
+//
+
+async crearTicket(): Promise<void> {
+  this.submitted = true;
+
+  if (this.crearTicketForm.invalid || !this.IdUsuario || !this.idHogar) {
+    console.warn('Formulario inválido o faltan datos de usuario/hogar');
+    return;
+  }
+
+  const formValues = this.crearTicketForm.getRawValue();
+
+  const ticket = {
+    id_categoriahogar: formValues.categoriaSeleccionada,
+    nombre: formValues.nombreTicket,
+    descripcion: formValues.descripcion,
+    id_usuario: this.IdUsuario,
+    monto_total: parseFloat(formValues.montoTicket),
+    fecha_creacion: formValues.fechaCreacion,
+    fecha_expiracion: formValues.fechaExpiracion,
+    estado: 'P'  
+  };
+
+  try {
+    await this.hogarService.crearTicket(ticket).toPromise();
+    console.log('Ticket creado exitosamente');
+    this.resetearCampos();
+    this.cerrarModal();
+  } catch (error) {
+    console.error('Error al crear el ticket:', error);
+  }
+}
+
+resetearCampos(): void {
+  this.crearTicketForm.patchValue({
+    nombreTicket: '',
+    descripcion: '',
+    montoTicket: '',
+    categoriaSeleccionada: ''
+  });
+
+  this.crearTicketForm.get('nombreTicket')?.markAsUntouched();
+  this.crearTicketForm.get('descripcion')?.markAsUntouched();
+  this.crearTicketForm.get('montoTicket')?.markAsUntouched();
+  this.crearTicketForm.get('categoriaSeleccionada')?.markAsUntouched();
+
+  this.submitted = false;
+}
+
+async abrirModalRevisar(): Promise<void> {
+  if (!this.idHogar) {
+    console.warn('No hay ID de hogar disponible');
+    return;
+  }
+
+  try {
+    const response = await this.hogarService.obtenerTicketsPendientes(this.idHogar).toPromise();
+    
+    if (response.status === 'success') {
+      this.ticketsPendientes = response.tickets;
+      this.mostrarModalRevisar = true;
+    } else {
+      console.error('Error al obtener tickets pendientes:', response.message);
+    }
+  } catch (error) {
+    console.error('Error al cargar tickets pendientes:', error);
+  }
+}
+
+async aprobarTicket(idTicket: number): Promise<void> {
+  await this.procesarTicket(idTicket, 'A', 'aprobado');
+  this.cerrarModalRevisar();
+}
+
+async rechazarTicket(idTicket: number): Promise<void> {
+  await this.procesarTicket(idTicket, 'R', 'rechazado');
+  this.cerrarModalRevisar();
+}
+
+private async procesarTicket(idTicket: number, estado: string, accion: string): Promise<void> {
+  if (this.procesandoTicket) return;
+  
+  this.procesandoTicket = true;
+  
+  try {
+    const response = await this.hogarService.actualizarEstadoTicket(idTicket, estado).toPromise();
+    
+    if (response.status === 'success') {
+      console.log(`Ticket ${accion} exitosamente`);
+      
+      this.ticketsPendientes = this.ticketsPendientes.filter(ticket => ticket.id !== idTicket);
+      
+      if (this.ticketsPendientes.length === 0) {
+        this.cerrarModalRevisar();
+      }
+    } else {
+      console.error(`Error al ${accion.substring(0, accion.length - 1)}ar ticket:`, response.message);
+    }
+  } catch (error) {
+    console.error(`Error al ${accion.substring(0, accion.length - 1)}ar ticket:`, error);
+  } finally {
+    this.procesandoTicket = false;
+  }
+  console.log('Tickets cargados:', this.ticketsPendientes);
+}
+
+cerrarModalRevisar(): void {
+  this.mostrarModalRevisar = false;
+  this.ticketsPendientes = [];
+}
+
+//
+// // FUNCIONES PARA GESTIONAR RESIDENTES
 //
   mostrarResidentes() {
     this.seccionActiva = 'residentes';
@@ -172,15 +360,23 @@ actualizarDescripcionCategoria(): void {
     }
   }
 
-
+//
+// // CONTROL DE ERRORES
+//
     getMensajeError(controlName: string): string {
     if (this.error === 1) {
       const control = this.crearCategoriaForm.get(controlName);
-      if (control?.errors && (control.touched || this.submitted)) {
-      if (control.errors['required']) return 'Este campo es obligatorio';
-      if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
-      if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+        if (control?.errors && (control.touched || this.submitted)) {
+        if (control.errors['required']) return 'Este campo es obligatorio';
       } 
+    } else if (this.error === 2){
+      const control = this.crearTicketForm.get(controlName);
+      if (control?.errors && (control.touched || this.submitted)) {
+        if (control.errors['required']) return 'Este campo es obligatorio';
+        if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
+        if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+        if (control.errors['min']) { return `El monto debe ser mayor a 0`; }
+      }
     }
     return '';
   }
