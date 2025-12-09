@@ -553,7 +553,7 @@ CORS(Api, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 def get_db_connection():
     return mysql.connector.connect(
         user=os.environ.get('DB_USER', 'root'),          # Usuario de TiDB
-        password=os.environ.get('DB_PASSWORD', 'hola12'), # Contraseña de TiDB
+        password=os.environ.get('DB_PASSWORD', ''), # Contraseña de TiDB
         host=os.environ.get('DB_HOST', 'localhost'),      # Host de TiDB
         database=os.environ.get('DB_NAME', 'apuntanet_db'), # Nombre de tu BD
         port=int(os.environ.get('DB_PORT', 3306)),        # Puerto (usualmente 4000 en TiDB)
@@ -1067,6 +1067,43 @@ def actualizar_estado_ticket(id_ticket):
         return jsonify({"status": "error", "message": f"Error: {err}"}), 500
     finally:
         if cursor: cursor.close()  
+
+@Api.route("/reporte/hogar/<int:id_hogar>", methods=["GET"])
+def reporte_hogar(id_hogar):
+    try:
+        verificar_conexion()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.callproc("sp_reporte_hogar_resueltos", (id_hogar,))  # <-- importante la coma
+
+        # Los resultados vienen en cursor.stored_results()
+        for result in cursor.stored_results():
+            data = result.fetchall()
+
+        return jsonify(data), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+
+
+
+@Api.route('/reporte/individual/<int:id_usuario>', methods=['GET'])
+def reporte_individual(id_usuario):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.callproc('sp_reporte_individual', (id_usuario,))
+
+    results = []
+    for result in cursor.stored_results():
+        results = result.fetchall()
+
+    conn.close()
+    return jsonify(results)
+
 
 def crearcodigo():
     verificar_conexion()
