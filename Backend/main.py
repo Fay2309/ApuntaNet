@@ -11,7 +11,7 @@ CORS(Api, resources={r"/*": {"origins": "http://localhost:4200"}},
      supports_credentials=True)
 
 conexion = mysql.connector.connect(user='root',
-                                   password='201614',
+                                   password='hola12',
                                    host='localhost',
                                    database='apuntanet_db')
 
@@ -31,8 +31,13 @@ def login():
     cursor.close()
 
     if resultado:
+        token = jwt.encode({
+            'usuario': usuario,
+            'id_usuario': resultado[0]
+        },
+        SECRET_KEY, algorithm='HS256')
 
-        return jsonify({"status": "Correcto", "message": "Inicio de sesión exitoso"}), 200
+        return jsonify({"status": "Correcto", "message": "Inicio de sesión exitoso", "token": token}), 200
     else:
         return jsonify({"status": "error", "message": "Credenciales incorrectas"}), 401
 
@@ -465,6 +470,49 @@ def obtener_tickets_pendientes(id_hogar):
         
     finally:
         cursor.close()
+
+
+#ruta para obtener los tickets APROBADOS de un hogar
+@Api.route("/tickets/aprobados/<int:id_hogar>", methods=["GET"])
+def obtener_tickets_aprobados(id_hogar):
+    try:
+        query = """
+            SELECT 
+                t.id,
+                t.nombre,
+                t.descripcion,
+                t.monto_total,
+                t.fecha_creacion,
+                t.fecha_expiracion,
+                u.usuario as nombre_usuario,
+                c.nombre as nombre_categoria
+            FROM ticket t
+            JOIN usuarios u ON t.id_usuario = u.id
+            JOIN categorias_hogar ch ON t.id_categoriahogar = ch.id
+            JOIN categoria c ON ch.id_categoria = c.id
+            WHERE ch.id_hogar = %s AND t.estado = 'A'
+            ORDER BY t.fecha_creacion DESC
+        """
+        
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute(query, (id_hogar,))
+        tickets = cursor.fetchall()
+        
+        for ticket in tickets:
+            if ticket['fecha_creacion']:
+                ticket['fecha_creacion'] = ticket['fecha_creacion'].isoformat()
+            if ticket['fecha_expiracion']:
+                ticket['fecha_expiracion'] = ticket['fecha_expiracion'].isoformat()
+        
+        return jsonify({"status": "success", "tickets": tickets}), 200
+        
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": f"Error: {err}"}), 500
+        
+    finally:
+        cursor.close()
+
+
 
 #esta ruta sirve para actualizar el estado de un ticket
 #se le pasa el id del ticket y el nuevo estado, el cual puede ser 'A' (Aprobado) o 'R' (Rechazado)
