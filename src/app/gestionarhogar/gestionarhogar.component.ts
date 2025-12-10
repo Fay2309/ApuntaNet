@@ -294,11 +294,13 @@ async abrirModalRevisar(): Promise<void> {
       this.mostrarModalRevisar = true;
     } else {
       console.error('Error al obtener tickets pendientes:', response.message);
+      console.log("hola")
     }
   } catch (error) {
     console.error('Error al cargar tickets pendientes:', error);
   }
 }
+
 
 async aprobarTicket(idTicket: number): Promise<void> {
   await this.procesarTicket(idTicket, 'A', 'aprobado');
