@@ -6,8 +6,7 @@ import { Subscription } from 'rxjs';
 import { HogarService } from '@app/services/hogar.service';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
-import { TicketPendiente } from './gestionarhogar.interface';
-
+import { TicketPendiente, TicketAprobado } from './gestionarhogar.interface';
 
 @Component({
   selector: 'app-gestionarhogar',
@@ -37,6 +36,8 @@ export class GestionarhogarComponent {
   mostrarModalRevisar = false;
   procesandoTicket = false;
   descripcionCategoria: string = '';
+  ticketsHistorial: TicketAprobado[] = [];
+  mostrarModalHistorial: boolean = false;
 
   private subscription: Subscription = new Subscription();
 
@@ -338,6 +339,30 @@ private async procesarTicket(idTicket: number, estado: string, accion: string): 
   }
   console.log('Tickets cargados:', this.ticketsPendientes);
 }
+
+    async abrirHistorial(): Promise<void> {
+      if (!this.idHogar) {
+        console.warn('No hay ID de hogar disponible');
+        return;
+      }
+      try {
+        const response = await this.hogarService.obtenerHistorialAprobados(this.idHogar).toPromise();
+        
+        if (response && response.status === 'success') {
+          this.ticketsHistorial = response.tickets; 
+          this.mostrarModalHistorial = true;        
+        } else {
+          console.error('Error al obtener historial:', this.error);
+        }
+
+      } catch (error) {
+        console.error('Error al cargar historial:', error);
+      }
+    }
+
+    cerrarHistorial() {
+        this.mostrarModalHistorial = false;
+      }
 
 cerrarModalRevisar(): void {
   this.mostrarModalRevisar = false;

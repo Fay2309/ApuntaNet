@@ -69,6 +69,10 @@ actualizarEstadoTicket(idTicket: number, estado: string): Observable<any> {
   return this.http.put<any>(`${this.apiresidentes}/tickets/${idTicket}/estado`, { estado });
 }
 
+obtenerHistorialAprobados(idHogar: number): Observable<any> {
+  const timestamp = new Date().getTime(); 
+  return this.http.get<any>(`${this.apiresidentes}/tickets/aprobados/${idHogar}?t=${timestamp}`);
+}
 //
 // // METODOS PARA ENVIAR DATOS DESDE BIENVENIDA A GESTIONAR HOGAR
 //

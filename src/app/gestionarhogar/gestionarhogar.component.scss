@@ -648,3 +648,35 @@ label {
   justify-content: space-between;
   height: 100%;
 }
+
+/* 1. Forzamos al modal a tener una estructura fija */
+.modal-dialog.modal-dialog-scrollable {
+  height: calc(100% - 3.5rem); /* Altura estándar */
+}
+
+.modal-dialog-scrollable .modal-content {
+  max-height: 100%; 
+  overflow: hidden; 
+}
+
+/* 2. EL TRUCO: Forzamos el scroll siempre visible */
+/* Esto evita que la pantalla "salte" cuando entra/sale el mouse */
+.modal-dialog-scrollable .modal-body {
+  overflow-y: scroll; /* Cambia 'auto' por 'scroll' */
+  padding-right: 5px; /* Un pequeño espacio para que no se pegue el texto */
+}
+
+/* Opcional: Estilizar el scroll para que sea más elegante y delgado */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+.modal-body::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 4px;
+}
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
